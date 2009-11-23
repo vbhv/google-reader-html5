@@ -1,24 +1,11 @@
 GoogleReaderConst = {
     URI_LOGIN: 'https://www.google.com/accounts/ClientLogin',
     URI_PREFIXE_READER: 'http://www.google.com/reader/',
-    URI_PREFIXE_ATOM: this.URI_PREFIXE_READER + 'atom/',
-    URI_PREFIXE_API: this.URI_PREFIXE_READER + 'api/0/',
-    URI_PREFIXE_VIEW: this.URI_PREFIXE_READER + 'view/',
 
     ATOM_GET_FEED: 'feed/',
 
     ATOM_PREFIXE_USER: 'user/-/',
     ATOM_PREFIXE_USER_NUMBER: 'user/'+'0'*20+'/',
-    ATOM_PREFIXE_LABEL: this.ATOM_PREFIXE_USER + 'label/',
-    ATOM_PREFIXE_STATE_GOOGLE: this.ATOM_PREFIXE_USER + 'state/com.google/',
-
-    ATOM_STATE_READ:         this.ATOM_PREFIXE_STATE_GOOGLE + 'read',
-    ATOM_STATE_UNREAD:       this.ATOM_PREFIXE_STATE_GOOGLE + 'kept-unread',
-    ATOM_STATE_FRESH:        this.ATOM_PREFIXE_STATE_GOOGLE + 'fresh',
-    ATOM_STATE_READING_LIST: this.ATOM_PREFIXE_STATE_GOOGLE + 'reading-list',
-    ATOM_STATE_BROADCAST:    this.ATOM_PREFIXE_STATE_GOOGLE + 'broadcast',
-    ATOM_STATE_STARRED:      this.ATOM_PREFIXE_STATE_GOOGLE + 'starred',
-    ATOM_SUBSCRIPTIONS:      this.ATOM_PREFIXE_STATE_GOOGLE + 'subscriptions',
 
     API_EDIT_SUBSCRIPTION: 'subscription/edit',
     API_EDIT_TAG: 'edit-tag',
@@ -28,8 +15,6 @@ GoogleReaderConst = {
     API_LIST_TAG: 'tag/list',
     API_LIST_UNREAD_COUNT: 'unread-count',
     API_TOKEN: 'token',
-
-    URI_QUICKADD: this.URI_PREFIXE_READER + 'quickadd',
 
     OUTPUT_XML: 'xml',
     OUTPUT_JSON: 'json',
@@ -82,4 +67,19 @@ GoogleReaderConst = {
 
     GOOGLE_SCHEME: 'http://www.google.com/reader/',
 }
+
+
+GoogleReaderConst['URI_PREFIXE_ATOM'] = GoogleReaderConst.URI_PREFIXE_READER + 'atom/';
+GoogleReaderConst['URI_PREFIXE_API'] = GoogleReaderConst.URI_PREFIXE_READER + 'api/0/';
+GoogleReaderConst['URI_PREFIXE_VIEW'] = GoogleReaderConst.URI_PREFIXE_READER + 'view/';
+GoogleReaderConst['ATOM_PREFIXE_LABEL'] = GoogleReaderConst.ATOM_PREFIXE_USER + 'label/';
+GoogleReaderConst['ATOM_PREFIXE_STATE_GOOGLE'] = GoogleReaderConst.ATOM_PREFIXE_USER + 'state/com.google/';
+GoogleReaderConst['ATOM_STATE_READ'] = GoogleReaderConst.ATOM_PREFIXE_STATE_GOOGLE + 'read';
+GoogleReaderConst['ATOM_STATE_UNREAD'] = GoogleReaderConst.ATOM_PREFIXE_STATE_GOOGLE + 'kept-unread';
+GoogleReaderConst['ATOM_STATE_FRESH'] = GoogleReaderConst.ATOM_PREFIXE_STATE_GOOGLE + 'fresh';
+GoogleReaderConst['ATOM_STATE_READING_LIST'] = GoogleReaderConst.ATOM_PREFIXE_STATE_GOOGLE + 'reading-list';
+GoogleReaderConst['ATOM_STATE_BROADCAST'] = GoogleReaderConst.ATOM_PREFIXE_STATE_GOOGLE + 'broadcast';
+GoogleReaderConst['ATOM_STATE_STARRED'] = GoogleReaderConst.ATOM_PREFIXE_STATE_GOOGLE + 'starred';
+GoogleReaderConst['ATOM_SUBSCRIPTIONS'] = GoogleReaderConst.ATOM_PREFIXE_STATE_GOOGLE + 'subscriptions';
+GoogleReaderConst['URI_QUICKADD'] = GoogleReaderConst.URI_PREFIXE_READER + 'quickadd';
 

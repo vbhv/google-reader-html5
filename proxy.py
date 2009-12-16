@@ -18,6 +18,12 @@ url = params.pop('url')
 method = 'GET' if not 'method' in params else params.pop('method')
 param_str = urllib.urlencode(params)
 
+if 'FAKE' in params:
+	import fake_cache
+	print fake_cache.respond(url, params)
+	import sys
+	sys.exit(0)
+
 args = (url, param_str)
 if method == 'GET':
 	args = (("%s?%s" % args),)

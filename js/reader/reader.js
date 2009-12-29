@@ -60,7 +60,7 @@ function GoogleReader() {
 	this.get_feed = function(opts, cb) {
 		// returns a GoogleFeed, giving either an 'url' or a 'feed' internal name.
 		// other arguments may be any keys of GoogleReaderConst.ATOM_ARGS keys
-		var feedurl:
+		var feedurl;
 		if ('url' in opts) {
 			feedurl = GoogleReaderConst.ATOM_GET_FEED + urllib.quote_plus(url); // grab a url
 		} else if ('feed' in opts) {
@@ -98,7 +98,7 @@ function GoogleReader() {
 		this.get_api_list(GoogleReaderConst.URI_PREFIXE_API + GoogleReaderConst.API_LIST_TAG, {all:true}, cb);
 	};
 
-	this.def get_unread_count_list = function(db) {
+	this.get_unread_count_list = function(db) {
 		// returns a structure containing the number of unread items in each subscriptions/tags.
 		this.get_api_list(GoogleReaderConst.URI_PREFIXE_API + GoogleReaderConst.API_LIST_UNREAD_COUNT, {all:true}, cb);
 	};
@@ -123,27 +123,27 @@ function GoogleReader() {
 		this.edit_tag({entry:entry, add:GoogleReaderConst.ATOM_STATE_UNREAD, remove:GoogleReaderConst.ATOM_STATE_READ}, cb);
 	};
 
-	this.add_star = function(entry}, cb) {
+	this.add_star = function(entry, cb) {
 		this.edit_tag({entry:entry, add:GoogleReaderConst.ATOM_STATE_STARRED}, cb);
 	};
 
-	this.del_star = function(entry}, cb) {
+	this.del_star = function(entry, cb) {
 		this.edit_tag({entry:entry, remove:GoogleReaderConst.ATOM_STATE_STARRED}, cb);
 	};
 
-	this.add_public = function(entry}, cb) {
+	this.add_public = function(entry, cb) {
 		this.edit_tag({entry:entry, add:GoogleReaderConst.ATOM_STATE_BROADCAST}, cb);
 	};
 
-	this.del_public = function(entry}, cb) {
+	this.del_public = function(entry, cb) {
 		this.edit_tag({entry:entry, remove:GoogleReaderConst.ATOM_STATE_BROADCAST}, cb);
 	};
 
-	this.add_label = function(entry,labelname}, cb) {
+	this.add_label = function(entry, labelname, cb) {
 		this.edit_tag({entry:entry, add:GoogleReaderConst.ATOM_PREFIXE_LABEL+labelname}, cb);
 	};
 
-	this.del_label = function(entry,labelname}, cb) {
+	this.del_label = function(entry,labelname, cb) {
 		this.edit_tag({entry:entry, remove:GoogleReaderConst.ATOM_PREFIXE_LABEL+labelname}, cb);
 	};
 

@@ -15,6 +15,7 @@ GoogleReaderConst = {
     API_LIST_TAG: 'tag/list',
     API_LIST_UNREAD_COUNT: 'unread-count',
     API_TOKEN: 'token',
+    ITEMS_PER_REQUEST: 100, // just a default
 
     OUTPUT_XML: 'xml',
     OUTPUT_JSON: 'json',

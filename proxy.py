@@ -7,9 +7,6 @@ import urllib
 import cookielib
 cgitb.enable()
 
-print "Content-Type: text/html"
-print
-
 params = cgi.FieldStorage()
 
 params = dict((p.name, p.value) for p in params.list)
@@ -35,4 +32,7 @@ if 'SID' in params:
 	urllib2.install_opener(urllib2.build_opener(handler))
 
 stream = urllib2.urlopen(*args)
+content_type = stream.info().type
+print "Content-Type: %s" % (content_type,)
+print
 print stream.read()

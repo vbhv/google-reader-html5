@@ -12,7 +12,6 @@ function GoogleReader() {
 		}
 		_this = this;
 		POST(GoogleReaderConst.URI_LOGIN, data, function(sidinfo) {
-			console.log("sidinfo: " + sidinfo);
 			_this.sid = null;
 			SID_ID = 'SID=';
 			if (sidinfo.indexOf(SID_ID) != -1) {
@@ -21,7 +20,6 @@ function GoogleReader() {
 					sid = sid.split('\n')[0]
 				}
 				_this.sid = sid
-				console.log("SID: " + sid);
 				cb();
 			} else {
 				console.log("authentication failed");
@@ -53,7 +51,7 @@ function GoogleReader() {
 	this.get_api_list = function(url, data, cb) {
 		data['output'] = GoogleReaderConst.OUTPUT_JSON;
 		data['client'] = GoogleReaderConst.AGENT;
-		this.GET(url, data, function(obj){ console.log(obj); cb(JSON.parse(obj)); });
+		this.GET(url, data, function(obj){ cb(JSON.parse(obj)); });
 	};
 
 	this.get_timestamp = function() {
@@ -92,9 +90,7 @@ function GoogleReader() {
 		opts['timestamp'] = this.get_timestamp();
 		this._translate_args( GoogleReaderConst.ATOM_ARGS, urlargs, opts );
 
-		console.log("CB = " +  cb);
 		function inner_cb(data) {
-			console.log("got some data, yo: " + data);
 			cb(new Feed(data));
 		}
 		this.GET(feedurl, urlargs, inner_cb);
@@ -180,15 +176,60 @@ function GoogleReader() {
 
 function Feed(xmlDocument) {
 	this.doc = jQuery(xmlDocument);
-	this.entries = Array();
 	this.properties = {};
 	this.continuation = null;
 	this.entries = Array();
-	this.doc.find("feed > entry").each(function(entry) {
-		this.entries.push(new Entry(entry));
+	var self = this;
+	this.doc.find("feed > entry").each(function() {
+		self.entries.push(new Entry(this));
 	});
+
+	this.render = function() {
+		var result = new Array();
+		jQuery.each(this.entries, function(e) {
+			result.push(this.render());
+		});
+		return mkNode({type:'div', children: result});
+	};
 }
 
 function Entry(xml) {
-	this.doc = xml;
+	this.doc = jQuery(xml);
+	this.body = this.doc.children('summary').eq(0).text();
+	this.title = this.doc.children('title').eq(0).text();
+	this.link = this.doc.children('link').eq(0).attr('href');
+	this.google_id = this.doc.children('id').eq(0).text();
+
+	this.render = function() {
+		var body = mkNode({type:'div'});
+		body.innerHTML = this.body;
+
+		var header = mkNode({
+			type:'h3',
+			children: [
+				{type:'a', href: this.link, text: this.title},
+			],
+		});
+
+		var footer = this.toolbar();
+
+		var root = mkNode({
+			type: 'div',
+			children: [header, body, footer],
+		});
+		
+		return root;
+	};
+
+	this.toolbar = function() {
+		return mkNode({
+			type:'div',
+			class: 'toolbar',
+			children: [
+				{type:'a', href: '#hello', text: "clicky!"},
+			],
+		});
+	};
+
 }
+

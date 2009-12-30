@@ -27,8 +27,18 @@ body {
 	height:100%;
 	top:0;
 	border-left:1px solid #777;
+	overflow:auto;
 }
 
 a {
 	cursor: pointer;
+}
+
+.toolbar {
+	width:100%;
+	background: #ddd;
+	border-top: 2px solid #fff;
+	border-bottom: 1px solid #888;
+	margin-bottom:3em;
+	margin-top:0.5em;
 }

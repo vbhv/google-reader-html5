@@ -108,11 +108,11 @@ function GoogleReader() {
 		this.get_api_list(GoogleReaderConst.URI_PREFIXE_API + GoogleReaderConst.API_LIST_TAG, {all:true}, cb);
 	};
 
-	this.get_unread_count_list = function(db) {
+
+	this.get_unread_count_list = function(cb) {
 		// returns a structure containing the number of unread items in each subscriptions/tags.
 		this.get_api_list(GoogleReaderConst.URI_PREFIXE_API + GoogleReaderConst.API_LIST_UNREAD_COUNT, {all:true}, cb);
 	};
-
 
 
 	// HIGH-level
@@ -134,6 +134,43 @@ function GoogleReader() {
 		opts['feed'] = GoogleReaderConst.ATOM_PREFIXE_LABEL + tag;
 
 		return this.get_feed(opts, cb)
+	};
+
+	this.get_user_tags = function(cb) {
+		// returns an array of [tag_name, count] pairs
+		var self = this;
+		// var unread_hash = [];
+		// this.get_unread_count_list(function(result) {
+		// 	var unreadcounts = result.unreadcounts;
+		// 	jQuery.each(unreadcounts, function(i) {
+		// 		var count_obj = unreadcounts[i];
+		// 		console.log("count_obj: " + count_obj);
+		// 		if ('count' in count_obj && 'id' in count_obj) {
+		// 			console.log("feed " + count_obj.id + " has " + count_obj.count + " unread items");
+		// 			unread_hash[count_obj.id] = count_obj.count;
+		// 		} else {
+		// 			console.log("incomplete count object: " + count_obj);
+		// 		}
+		// 	});
+
+			self.get_tag_list(function(tag_list) {
+				var tags = tag_list.tags;
+				var tag_names = Array();
+				for(var i=0; i<tags.length; i++) {
+					var tag = tags[i];
+					// var count = unread_hash[tag.id];
+					parts = tag.id.split('/',4);
+					var name = parts[3];
+					if (parts[2] == 'label') {
+						tag_names.push(name);
+						console.log("TAG: " + name);
+					} else {
+						console.log("feed: " + tag.id);
+					}
+				}
+				cb(tag_names);
+			});
+		// });
 	};
 
 	this.get_unread = function(cb) {

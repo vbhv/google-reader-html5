@@ -16,14 +16,16 @@ function init_tags() {
 	});
 };
 
+function do_sync() {
+	sync.run(function() { ui.refresh(); });
+}
+
 function main() {
 	reader = new GoogleReader();
 	store = new Store('dom');
 	sync = new Sync(reader, store);
 	ui = new UI(store);
-	login(function() {
-		sync.run(function() {ui.refresh();});
-	});
+	login(do_sync);
 };
 
 $(main);

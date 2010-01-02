@@ -33,16 +33,32 @@ function mkNode(props) {
 }
 
 
-function EntryView() {
+function EntryView(ui) {
+	this.ui = ui;
+
 	this.render = function(e) {
+		var self=this;
 		var body = mkNode({type:'div'});
 		body.innerHTML = e.body;
 
 		var header = mkNode({
-			type:'h3',
-			children: [
-				{type:'a', href: e.link, text: e.title},
-			],
+			type:'div', children: [
+				{
+					type:'div',
+					class: 'toolbar',
+					children: [
+						{type: 'a', text: '^up', onclick: function() { self.ui.show_feed_list(); }},
+					]
+				},
+				{type:'div', children: [
+					{
+						type:'h3',
+						children: [
+							{type:'a', href: e.link, text: e.title},
+						],
+					},
+				]},
+			]
 		});
 
 		var footer = this.toolbar(e);
@@ -71,7 +87,7 @@ function EntryListView(ui) {
 
 	this.render = function(e) {
 		var self=this;
-		return mkNode({type: 'div', children: [
+		return mkNode({type: 'li', children: [
 			{type: 'a', text:e.title, onclick: function() { self.ui.load_entry(e); }},
 		]});
 	};
@@ -89,13 +105,49 @@ function FeedView(ui, entryView) {
 		return mkNode({type: 'div',
 			children: [
 				{type: 'div', children: [
-					{type: 'a', onclick: function() { self.ui.show_tags(); }, text: '<back'},
-					{type:'div', children: result},
+					{
+						type: 'div',
+						class: 'toolbar',
+						children: [
+							{type: 'a', onclick: function() { self.ui.show_tags(); }, text: '<back'},
+						]
+					},
+					{type:'ul', children: result},
 				]}
 			]
 		});
 	};
 };
+
+function TagListView(ui, tagView) {
+	this.ui = ui;
+	this.tagView = tagView;
+
+	this.render = function(e) {
+		var children = jQuery.map(e, this.tagView.render);
+		return mkNode({
+			type:'div',
+			children: [
+				{
+					type:'div',
+					class: 'toolbar',
+					children: [
+						{
+							type: 'a',
+							text: 'sync',
+							onclick: do_sync,
+						},
+					],
+				},
+				{
+					type: 'ul',
+					children: children,
+				},
+			],
+		});
+
+	};
+}
 
 function TagView(ui) {
 	this.ui = ui;

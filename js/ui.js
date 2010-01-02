@@ -6,7 +6,7 @@ function UI (store){
 	this.views = {
 		entry: new EntryView(this),
 		feed: new FeedView(this, new EntryListView(this)),
-		tag: new TagView(this),
+		taglist: new TagListView(this, new TagView(this)),
 	};
 
 	this.dom_areas = [this.tags_dom, this.feed_dom, this.entry_dom];
@@ -18,9 +18,7 @@ function UI (store){
 	this.reload_tags = function() {
 		var self=this;
 		self.tags_dom.empty();
-		jQuery.each(this.store.get_all_tags(), function() {
-			self.tags_dom.append(self.render('tag', this));
-		});
+		self.tags_dom.append(self.render('taglist', this.store.get_all_tags()));
 	};
 
 	this.refresh = function() {
@@ -38,14 +36,8 @@ function UI (store){
 		});
 	};
 
-	this.load_entry = function(tag) {
-		this.entry_dom.html(tag.body);
-		var self=this;
-		this.entry_dom.prepend(mkNode({
-			type:'div', children: [
-				{type: 'a', text: '^up', onclick: function() { self.show_feed_list(); }},
-			]
-		}));
+	this.load_entry = function(entry) {
+		this.entry_dom.empty().append(this.render('entry', entry));
 		this.show(this.entry_dom);
 	};
 

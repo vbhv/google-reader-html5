@@ -21,10 +21,17 @@ FuncTools = {
 	},
 
 	execute_map: function(arr, func, on_complete) {
+		var id = arr.length;
 		var remaining = arr.length;
+		// window.setTimeout(function() {
+		// 	if(remaining > 0) {
+		// 		throw("timed out wating for " + remaining + " instances");
+		// 	}
+		// }, 10 * 1000);
 		jQuery.each(arr, function() {
 			func.apply(this, [function() {
 				remaining -= 1;
+				// console.log("[" + id + " " + arr + "]: remaining: " + remaining);
 				if (remaining == 0) on_complete();
 			}]);
 		});

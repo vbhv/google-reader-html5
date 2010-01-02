@@ -220,14 +220,6 @@ function Feed(xmlDocument) {
 	this.doc.find("feed > entry").each(function() {
 		self.entries.push(new Entry(this));
 	});
-
-	this.render = function() {
-		var result = new Array();
-		jQuery.each(this.entries, function(e) {
-			result.push(this.render());
-		});
-		return mkNode({type:'div', children: result});
-	};
 }
 
 function Entry(xml) {
@@ -236,37 +228,5 @@ function Entry(xml) {
 	this.title = this.doc.children('title').eq(0).text();
 	this.link = this.doc.children('link').eq(0).attr('href');
 	this.google_id = this.doc.children('id').eq(0).text();
-
-	this.render = function() {
-		var body = mkNode({type:'div'});
-		body.innerHTML = this.body;
-
-		var header = mkNode({
-			type:'h3',
-			children: [
-				{type:'a', href: this.link, text: this.title},
-			],
-		});
-
-		var footer = this.toolbar();
-
-		var root = mkNode({
-			type: 'div',
-			children: [header, body, footer],
-		});
-		
-		return root;
-	};
-
-	this.toolbar = function() {
-		return mkNode({
-			type:'div',
-			class: 'toolbar',
-			children: [
-				{type:'a', href: '#hello', text: "clicky!"},
-			],
-		});
-	};
-
 }
 

@@ -12,21 +12,10 @@ body {
 	height:100%;
 }
 
-#side {
-	width:30%;
-	overflow:auto;
-	height:100%;
-	float:left;
-}
-
 #content {
 	background:#eee;
-	position:absolute;
 	right:0;
-	width:70%;
-	height:100%;
 	top:0;
-	border-left:1px solid #777;
 	overflow:auto;
 }
 

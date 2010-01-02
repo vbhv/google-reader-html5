@@ -15,7 +15,6 @@
 		<script type="text/javascript" src="js/lawnchair/adaptors/GearsSqliteAdaptor.js"></script>
 		<script type="text/javascript" src="js/lawnchair/adaptors/WebKitSqliteAdaptor.js"></script>
 		<script type="text/javascript" src="js/lawnchair/lawnchair.js"></script>
-		<script type="text/javascript" src="js/persist.js"></script>
 
 		<!-- google reader API -->
 		<script type="text/javascript" src="js/reader/const.js"></script>
@@ -23,18 +22,17 @@
 
 		<!-- app -->
 		<script type="text/javascript" src="js/ui.js"></script>
+		<script type="text/javascript" src="js/sync.js"></script>
+		<script type="text/javascript" src="js/persistence.js"></script>
 		<script type="text/javascript" src="js/main.js"></script>
 
 		<link rel="stylesheet" type="text/css" href="index.css" />
 	</head>
 	<body>
 		<div id="app">
-			<div id="side">
-				<ul id="tags"></ul>
-			</div>
-			<div id="content">
-				<h3>Loading...</h3>
-			</div>
+			<ul id="tags"></ul>
+			<div id="feed" style="display:none;"></div>
+			<div id="entry" style="display:none;"></div>
 		</div>
 	</body>
 </html>

@@ -11,7 +11,7 @@ function _ajax(method, url, data, cb, err) {
 	if ('Passwd' in data && data.Passwd == '') {
 		// if we're logging in with dummy details..
 		_USE_FAKE_ = true;
-		console.log("using fake connection");
+		// console.log("using fake connection");
 	}
 	if (_USE_PROXY_) {
 		data['url'] = url;
@@ -22,12 +22,12 @@ function _ajax(method, url, data, cb, err) {
 			data['FAKE'] = 1;
 		}
 	}
-	console.log("DATA: " + JSON.stringify(data));
+	// console.log("DATA: " + JSON.stringify(data));
 	jQuery.ajax({
 		type: method,
 		url: url,
 		data: data,
-		error: err || function() { alert("things went sour :/"); },
+		error: err || function() { alert("things went sour while fetching url: " + url + " with data:\n" + data); },
 		success: cb,
 	})
 }

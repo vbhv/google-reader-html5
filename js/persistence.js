@@ -12,25 +12,21 @@ function Store(mode) {
 	this.set_valid_tags = function(tags, cb) {
 		this.valid_tags.nuke();
 		var self = this;
-		var remaining_tags = tags.length;
-		jQuery.each(tags, function() {
+		FuncTools.execute_map(tags, function(_cb) {
 			var tag_name = this;
 			self.valid_tags.save({key:tag_name});
 			self.tag(tag_name, function(tag_store) {
-				remaining_tags -= 1;
 				if(tag_store == null) {
-					remaining_tags += 1;
 					tag_store = {key:tag_name};
 					self.tags.save(tag_store, function() {
-						console.log("STORE: added tag: " + tag_name + " ( " + remaining_tags + " left)");
-						remaining_tags -= 1;
-						if(remaining_tags == 0) cb();
+						console.log("STORE: added tag: " + tag_name);
+						_cb();
 					});
 				} else {
-					if(remaining_tags == 0) cb();
+					_cb();
 				}
 			});
-		});
+		}, cb);
 	};
 
 	this.get_all_tags = function() {

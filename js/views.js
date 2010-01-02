@@ -38,7 +38,7 @@ function EntryView(ui) {
 
 	this.render = function(e) {
 		var self=this;
-		var body = mkNode({type:'div'});
+		var body = mkNode({type:'div', class:'content'});
 		body.innerHTML = e.body;
 
 		var header = mkNode({
@@ -50,9 +50,9 @@ function EntryView(ui) {
 						{type: 'a', text: '^up', onclick: function() { self.ui.show_feed_list(); }},
 					]
 				},
-				{type:'div', children: [
+				{type:'div', class:'post-info header', children: [
 					{
-						type:'h3',
+						type:'h1',
 						children: [
 							{type:'a', href: e.link, text: e.title},
 						],
@@ -61,7 +61,11 @@ function EntryView(ui) {
 			]
 		});
 
-		var footer = this.toolbar(e);
+		var footer = mkNode({
+			type:'p',
+			class: 'post-info footer',
+			text: "posted {WHEN} in tag {TAG}",
+		});
 
 		var root = mkNode({
 			type: 'div',
@@ -71,15 +75,6 @@ function EntryView(ui) {
 		return root;
 	};
 
-	this.toolbar = function(e) {
-		return mkNode({
-			type:'div',
-			class: 'toolbar',
-			children: [
-				{type:'a', href: '#hello', text: "clicky!"},
-			],
-		});
-	};
 }
 
 function EntryListView(ui) {

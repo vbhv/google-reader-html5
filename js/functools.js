@@ -29,9 +29,11 @@ FuncTools = {
 		// 	}
 		// }, 10 * 1000);
 		jQuery.each(arr, function() {
-			func.apply(this, [function() {
+		var elem = this;
+			console.log("[" + id + "] - START: " + elem);
+			func.apply(elem, [function() {
 				remaining -= 1;
-				// console.log("[" + id + " " + arr + "]: remaining: " + remaining);
+				console.log("[" + id + "] - FINISH: " + elem + " ( " + remaining + " )");
 				if (remaining == 0) on_complete();
 			}]);
 		});

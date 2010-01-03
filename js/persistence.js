@@ -9,6 +9,16 @@ function Store(mode) {
 	this.items = this._table('items');
 	this.resources = this._table('res');
 
+	this.ifEmpty = function(ifTrue, ifFalse) {
+		this.valid_tags.all(function(tags) {
+			if(tags.length == 0) {
+				ifTrue();
+			} else {
+				ifFalse();
+			}
+		});
+	};
+
 	this.clear = function() {
 		jQuery.each([
 			this.valid_tags,

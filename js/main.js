@@ -3,9 +3,12 @@ var ui;
 var sync;
 var store;
 var LOGIN_DETAILS = {};
+var LOGGED_IN = false;
 
-function login(cb){
-	reader.login(LOGIN_DETAILS.user || prompt('User'), LOGIN_DETAILS.password || prompt("Password"), cb);
+function ensure_login(cb){
+	if(LOGGED_IN) { return cb(); }
+	reader.login(LOGIN_DETAILS.user || prompt('User'), LOGIN_DETAILS.password || prompt("Password"),
+		function() { LOGGED_IN = true; cb() });
 };
 
 function init_tags() {
@@ -17,7 +20,11 @@ function init_tags() {
 };
 
 function do_sync() {
-	sync.run(function() { ui.refresh(); });
+	ensure_login(function() {
+		sync.run(function() {
+			ui.refresh();
+		});
+	});
 }
 
 function main() {
@@ -25,7 +32,7 @@ function main() {
 	store = new Store('dom');
 	sync = new Sync(reader, store);
 	ui = new UI(store);
-	login(do_sync);
+	store.ifEmpty(do_sync, function() {ui.refresh();});
 };
 
 $(main);

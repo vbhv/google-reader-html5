@@ -8,6 +8,7 @@ function Store(mode) {
 	this.feeds = this._table('feeds');
 	this.items = this._table('items');
 	this.resources = this._table('res');
+	this.action_store = this._table('actions');
 
 	this.ifEmpty = function(ifTrue, ifFalse) {
 		this.valid_tags.all(function(tags) {
@@ -40,7 +41,6 @@ function Store(mode) {
 					if(tag_store == null) {
 						tag_store = {key:tag_name};
 						self.tags.save(tag_store, function() {
-							console.log("STORE: added tag: " + tag_name);
 							_cb();
 						});
 					} else {
@@ -91,6 +91,70 @@ function Store(mode) {
 			} else {
 				cb();
 			}
+		});
+	};
+
+
+	this.toggle_flag = function(entry, flag, cb) {
+		console.log("adding flag: " + flag + " to entry " + entry);
+		var val = !(entry[flag] || false); // get it, then flip it
+		entry[flag] = val;
+		var self = this;
+		this.items.save(entry, function() {
+			self.add_action(flag, entry.id, val, function() {
+				cb(val);
+			});
+		});
+	};
+
+	this.add_action = function(action, key, value, cb) {
+		var _arguments = Array.prototype.slice.call(arguments);
+		var cb = _arguments.slice(-1)[0];
+		var args = _arguments.slice(0,-1);
+		this.modify_actions(function(actions) {
+			actions.push(args);
+			console.log("added action: " + args);
+		}, cb);
+	};
+
+	this.remove_action = function(params, cb) {
+		//FIXME: never seems to match an action...
+		this.modify_actions(function(actions) {
+			var index = jQuery.inArray(params, actions);
+			if(index != -1) {
+				actions.splice(index, 1); // remove 1 elem from index
+			} else {
+				console.log("all actions: " + JSON.stringify(actions));
+				console.log("ERROR: action not found to delete: " + JSON.stringify(params));
+				alert("ERROR: action not found to delete: " + JSON.stringify(params));
+			}
+		}, cb);
+	};
+
+	this.modify_actions = function(_do, cb) {
+		var self = this;
+		self._get_action_info(function(action_info) {
+			_do(action_info.values);
+			self.action_store.save(action_info, cb);
+		});
+	};
+
+	this._get_action_info = function(cb) {
+		this.action_store.all(function(action_info_list) {
+			var action_info;
+			if(action_info_list.length == 0) {
+				action_info = {key:1, values:[]};
+			} else {
+				action_info = action_info_list[0];
+			}
+			cb(action_info);
+		});
+	};
+		
+
+	this.pending_actions = function(cb) {
+		this._get_action_info(function(action_info) {
+			cb(action_info.values);
 		});
 	};
 

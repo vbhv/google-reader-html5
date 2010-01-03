@@ -19,17 +19,21 @@ function init_tags() {
 	});
 };
 
-function do_sync() {
+function do_sync(no_download) {
 	ensure_login(function() {
-		sync.run(function() {
-			ui.refresh();
-		});
+		var cb = function() { ui.refresh(); };
+		if(no_download) {
+			sync.push(cb);
+		} else {
+			sync.run(cb);
+		}
 	});
 }
 
 function main() {
 	reader = new GoogleReader();
-	store = new Store('dom');
+	// store = new Store('dom');
+	store = new Store();
 	sync = new Sync(reader, store);
 	ui = new UI(store);
 	store.ifEmpty(do_sync, function() {ui.refresh();});

@@ -37,13 +37,13 @@ function GoogleReader() {
 		POST(url, data, cb, err);
 	};
 
-	this.get_token = function(self, force) {
-		if(force || !self.token) {
-			feedurl = GoogleReaderConst.URI_PROFIXE_API +
-				GoogleReaderConst.API_TOKEN + '?client=' + GoogleReaderConst.AGENT
-			self.token = this.GET(feedurl);
+	this.get_token = function(force, cb) {
+		if(force || !this.token) {
+			var feedurl = GoogleReaderConst.URI_PREFIXE_API + GoogleReaderConst.API_TOKEN;
+			this.GET(feedurl, {client: GoogleReaderConst.AGENT}, cb);
+		} else {
+			cb(this.token);
 		}
-		return self.token;
 	};
 
 	// low-level:
@@ -60,6 +60,11 @@ function GoogleReader() {
 
 
 	this._translate_args = function(dictionary, googleargs, kwargs) {
+		// `dictionary` maps nicely named args (as keys) to
+		// google's API keys (as values). This takes in some
+		// kwartgs, and populates (mutates) googleargs
+		// appropriately.
+
 		for (arg in dictionary) {
 			if (arg in kwargs) {
 				googleargs[dictionary[arg]] = kwargs[arg];
@@ -96,6 +101,37 @@ function GoogleReader() {
 		this.GET(feedurl, urlargs, inner_cb);
 	};
 
+	this.edit_api = function(edit_operation, arg_mapping, opts, cb) {
+		var self = this;
+		var urlargs = {};
+		urlargs['client'] = GoogleReaderConst.AGENT;
+
+		var postargs = {};
+		self.get_token(false, function(token) {
+			opts['token'] = token;
+			self._translate_args( arg_mapping, postargs, opts );
+
+			var feedurl = GoogleReaderConst.URI_PREFIXE_API + edit_operation;
+			self.POST(feedurl, postargs, function(result_edit) {
+				if(jQuery.trim(result_edit) != "OK") {
+					//force try once more
+					self.get_token(true, function(token) {
+						self._translate_args( arg_mapping, postargs, opts )
+						self.POST(feedurl, postargs, function(result_edit) {
+							if(jQuery.trim(result_edit) != 'OK') {
+								alert("edit operation failed!");
+								cb(false);
+							} else {
+								cb(true);
+							}
+						}, function() { cb(false); });
+					});
+				} else {
+					cb(true);
+				}
+			});
+		});
+	};
 
 	// medium-level
 
@@ -112,6 +148,15 @@ function GoogleReader() {
 	this.get_unread_count_list = function(cb) {
 		// returns a structure containing the number of unread items in each subscriptions/tags.
 		this.get_api_list(GoogleReaderConst.URI_PREFIXE_API + GoogleReaderConst.API_LIST_UNREAD_COUNT, {all:true}, cb);
+	};
+
+	this.edit_tag = function(opts, cb) {
+		opts = opts || {}
+		if(!('feed' in opts)) {
+			opts['feed'] = GoogleReaderConst.ATOM_STATE_READING_LIST;
+		}
+		opts['action'] = 'edit-tags';
+		this.edit_api(GoogleReaderConst.API_EDIT_TAG, GoogleReaderConst.EDIT_TAG_ARGS, opts, cb);
 	};
 
 
@@ -176,28 +221,24 @@ function GoogleReader() {
 		this.get_feed({exclude_target:GoogleReaderConst.ATOM_STATE_READ}, cb);
 	};
 
-	this.set_read = function(entry, cb) {
-		this.edit_tag({entry:entry, add:GoogleReaderConst.ATOM_STATE_READ, remove:GoogleReaderConst.ATOM_STATE_UNREAD}, cb);
+
+	this.set_flag = function(entry, flag, add_or_remove, cb) {
+		var args = {entry:entry};
+		var key = add_or_remove ? 'add' : 'remove';
+		args[key] = flag;
+		this.edit_tag(args, cb);
 	};
 
-	this.set_unread = function(entry, cb) {
-		this.edit_tag({entry:entry, add:GoogleReaderConst.ATOM_STATE_UNREAD, remove:GoogleReaderConst.ATOM_STATE_READ}, cb);
+	this.set_read = function(entry, val, cb) {
+		this.set_flag(entry, GoogleReaderConst.ATOM_STATE_READ, val, cb);
 	};
 
-	this.add_star = function(entry, cb) {
-		this.edit_tag({entry:entry, add:GoogleReaderConst.ATOM_STATE_STARRED}, cb);
+	this.set_star = function(entry, val, cb) {
+		this.set_flag(entry, GoogleReaderConst.ATOM_STATE_STARRED, val, cb);
 	};
 
-	this.del_star = function(entry, cb) {
-		this.edit_tag({entry:entry, remove:GoogleReaderConst.ATOM_STATE_STARRED}, cb);
-	};
-
-	this.add_public = function(entry, cb) {
-		this.edit_tag({entry:entry, add:GoogleReaderConst.ATOM_STATE_BROADCAST}, cb);
-	};
-
-	this.del_public = function(entry, cb) {
-		this.edit_tag({entry:entry, remove:GoogleReaderConst.ATOM_STATE_BROADCAST}, cb);
+	this.set_public = function(entry, val, cb) {
+		this.set_flag(entry, GoogleReaderConst.ATOM_STATE_BROADCAST, val, cb);
 	};
 
 	this.add_label = function(entry, labelname, cb) {

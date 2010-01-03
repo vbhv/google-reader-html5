@@ -48,6 +48,8 @@ function EntryView(ui) {
 					class: 'toolbar',
 					children: [
 						{type: 'a', text: '^up', onclick: function() { self.ui.show_feed_list(); }},
+						{type: 'a', text: 'read', onclick: function() { self.ui.toggle_read(e); }},
+						{type: 'a', text: 'star', onclick: function() { self.ui.toggle_star(e); }},
 					]
 				},
 				{type:'div', class:'post-info header', children: [
@@ -127,11 +129,8 @@ function TagListView(ui, tagView) {
 					type:'div',
 					class: 'toolbar',
 					children: [
-						{
-							type: 'a',
-							text: 'sync',
-							onclick: do_sync,
-						},
+						{ type: 'a', text: 'sync', onclick: function(){do_sync();}, },
+						{ type: 'a', text: 'push', onclick: function(){do_sync(true);}, },
 					],
 				},
 				{

@@ -3,6 +3,7 @@ function UI (store){
 	this.tags_dom = jQuery("#tags");
 	this.feed_dom = jQuery("#feed");
 	this.entry_dom = jQuery("#entry");
+	this.active_entry = null;
 	this.views = {
 		entry: new EntryView(this),
 		feed: new FeedView(this, new EntryListView(this)),
@@ -38,6 +39,7 @@ function UI (store){
 	};
 
 	this.load_entry = function(entry) {
+		this.active_entry = entry;
 		this.entry_dom.empty().append(this.render('entry', entry));
 		this.show(this.entry_dom);
 	};
@@ -45,6 +47,22 @@ function UI (store){
 	this.show_feed_list = function() { this.show(this.feed_dom); };
 	this.show_tags = function() { this.show(this.tags_dom); };
 	this.show_entry = function() { this.show(this.entry_dom); };
+
+	this.toggle = function(entry, flag) {
+		var self=this;
+		this.store.toggle_flag(entry, flag, function(val) {
+			self.update_toolbar(entry);
+		});
+	};
+		
+	this.toggle_read = function(entry) { this.toggle(entry, 'read'); };
+	this.toggle_star = function(entry) { this.toggle(entry, 'star'); };
+
+	this.update_toolbar = function(entry) {
+		if(entry == this.active_entry) {
+			this.load_entry(entry);
+		}
+	};
 
 	this.show = function(dom) {
 		jQuery.each(this.dom_areas, function() {

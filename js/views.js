@@ -93,9 +93,9 @@ function FeedView(ui, entryView) {
 
 	this.render = function(e) {
 		var self = this;
-		var result = new Array();
-		jQuery.each(e.entries, function() {
-			result.push(entryView.render(this));
+
+		var result = jQuery.map(e.entries, function(entry) {
+			return entryView.render(entry);
 		});
 		return mkNode({type: 'div',
 			children: [

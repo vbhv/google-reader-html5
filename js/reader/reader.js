@@ -163,7 +163,6 @@ function GoogleReader() {
 					var name = parts[3];
 					if (parts[2] == 'label') {
 						tag_names.push(name);
-						console.log("TAG: " + name);
 					} else {
 						console.log("feed: " + tag.id);
 					}
@@ -224,9 +223,14 @@ function Feed(xmlDocument) {
 
 function Entry(xml) {
 	this.doc = jQuery(xml);
+	this.id = this.doc.children('id').eq(0).text();
 	this.body = this.doc.children('summary').eq(0).text();
 	this.title = this.doc.children('title').eq(0).text();
 	this.link = this.doc.children('link').eq(0).attr('href');
 	this.google_id = this.doc.children('id').eq(0).text();
+	this.doc = null; //this causes circular reference errors (somehow)
+	this.toString = function() {
+		return "ENTRY: " + this.id;
+	};
 }
 

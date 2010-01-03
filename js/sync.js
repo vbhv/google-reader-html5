@@ -10,7 +10,6 @@ function Sync(reader, store) {
 	};
 
 	this.pull_items = function(tag_name, cb) {
-		console.log("downloading tag " + tag_name);
 		var self = this;
 		this.reader.get_tag_feed(tag_name, function(feed) {
 			FuncTools.execute_map(
@@ -28,15 +27,16 @@ function Sync(reader, store) {
 
 	this.run = function(cb) {
 		var self = this;
+		this.store.clear();
 		this.pull_tags(function () {
-			var active_tags = self.store.get_active_tags();
-			FuncTools.execute_map(
-				active_tags, function(_cb) {
-					var tag_name = this;
-					console.log("getting tag: " + tag_name);
-					self.pull_items(tag_name, _cb);
-				}, cb
-			);
+			self.store.get_active_tags(function(active_tags) {
+				FuncTools.execute_map(
+					active_tags, function(_cb) {
+						var tag_name = this;
+						self.pull_items(tag_name, _cb);
+					}, cb
+				);
+			});
 		});
 	};
 }

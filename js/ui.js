@@ -18,19 +18,20 @@ function UI (store){
 	this.reload_tags = function() {
 		var self=this;
 		self.tags_dom.empty();
-		self.tags_dom.append(self.render('taglist', this.store.get_all_tags()));
+		this.store.get_all_tags(function(tags) {
+			self.tags_dom.append(self.render('taglist', tags));
+		});
 	};
 
 	this.refresh = function() {
 		console.log("UI: refresh...");
-		console.log(this.store);
 		this.reload_tags();
 		//TODO...
 	};
 
 	this.load_tag = function(tag_name){
 		var self = this;
-		reader.get_tag_feed(tag_name, function(feed) {
+		self.store.tag_with_entries(tag_name, function(feed) {
 			self.show_feed_list();
 			self.feed_dom.empty().append(self.render('feed', feed));
 		});

@@ -54,7 +54,7 @@ function Sync(reader, store) {
 		var self = this;
 		self.push(function() {
 			console.log("SYNC: state pushed!");
-			// self.store.clear();
+			self.store.clear();
 			self.pull_tags(function () {
 				self.store.get_active_tags(function(active_tags) {
 					FuncTools.execute_map(

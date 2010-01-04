@@ -48,8 +48,8 @@ function EntryView(ui) {
 					class: 'toolbar',
 					children: [
 						{type: 'a', text: '^up', onclick: function() { self.ui.show_feed_list(); }},
-						{type: 'a', text: 'read', onclick: function() { self.ui.toggle_read(e); }},
-						{type: 'a', text: 'star', onclick: function() { self.ui.toggle_star(e); }},
+						{type: 'a', text: (e.state.read ? 'keep' : 'mark read'), onclick: function() { self.ui.toggle_read(e); }},
+						{type: 'a', text: (e.state.star ? 'remove' : 'add') + ' star', onclick: function() { self.ui.toggle_star(e); }},
 					]
 				},
 				{type:'div', class:'post-info header', children: [
@@ -84,7 +84,7 @@ function EntryListView(ui) {
 
 	this.render = function(e) {
 		var self=this;
-		return mkNode({type: 'li', children: [
+		return mkNode({type: 'li', class:"entry-summary " + e.state.read ? "read" : "unread", children: [
 			{type: 'a', text:e.title, onclick: function() { self.ui.load_entry(e); }},
 		]});
 	};
@@ -146,11 +146,12 @@ function TagListView(ui, tagView) {
 function TagView(ui) {
 	this.ui = ui;
 	this.render = function(e) {
-		var name = e.key;
-		var num_items = e.unread;
+		var tag = e[0];
+		var num_items = e[1];
+		var name = tag.key;
 		var node = mkNode({
 			type:'li',
-			class: "tag",
+			class: "tag ",
 			children: [
 				{ type: 'a', onclick: function() { ui.load_tag(name); }, children: [
 					{ type: 'span', text: name },

@@ -247,12 +247,48 @@ function Feed(xmlDocument) {
 }
 
 function Entry(xml) {
+	var self = this;
 	this.doc = jQuery(xml);
 	this.id = this.doc.children('id').eq(0).text();
-	this.body = this.doc.children('summary').eq(0).text();
+	this.body = this.doc.children('content').eq(0).text();
+	if(!this.body) {
+		this.body = this.doc.children('summary').eq(0).text();
+	}
 	this.title = this.doc.children('title').eq(0).text();
 	this.link = this.doc.children('link').eq(0).attr('href');
 	this.google_id = this.doc.children('id').eq(0).text();
+	this.feed_name = this.doc.children('title').eq(0).text();
+	this.state = {
+		read: true,
+		star: false,
+		publish: false,
+		tags: [],
+	};
+	this.doc.children('category').each(function() {
+		var cat = jQuery(this);
+		var scheme = cat.attr("scheme");
+		if(scheme == GoogleReaderConst.GOOGLE_SCHEME) {
+			var term = cat.attr('term');
+			term = term.replace(/user\/[0-9]+\//, '');
+			term = term.replace(/state\/com\.google\//, 'state/');
+			var term_parts = term.split('/');
+			var type = term_parts[0];
+			var name = term_parts.slice(1).join("/");
+			if(type == 'label') {
+				self.state.tags.push(name);
+			} else if (type == 'state') {
+				if(name == 'reading-list') {
+					self.state.read = false;
+				} else if (name == 'starred') {
+					self.state.star = true;
+				} else if (name == 'broadcast') {
+					self.state.publish = true;
+				}
+			} else {
+				console.log("unknown category type: " + type);
+			}
+		}
+	});
 	this.doc = null; //this causes circular reference errors (somehow)
 	this.toString = function() {
 		return "ENTRY: " + this.id;

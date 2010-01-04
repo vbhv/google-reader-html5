@@ -3,15 +3,14 @@ function Store(mode) {
 		return new Lawnchair({table: name, adaptor: mode});
 	};
 
-	this.valid_tags = this._table('tags');
-	this.tags = this._table('tag_store');
+	this.tags = this._table('tag');
 	this.feeds = this._table('feeds');
 	this.items = this._table('items');
 	this.resources = this._table('res');
 	this.action_store = this._table('actions');
 
 	this.ifEmpty = function(ifTrue, ifFalse) {
-		this.valid_tags.all(function(tags) {
+		this.tags.all(function(tags) {
 			if(tags.length == 0) {
 				ifTrue();
 			} else {
@@ -22,7 +21,6 @@ function Store(mode) {
 
 	this.clear = function() {
 		jQuery.each([
-			this.valid_tags,
 			this.tags,
 			this.feeds,
 			this.items,
@@ -31,24 +29,28 @@ function Store(mode) {
 	};
 	
 
-	this.set_valid_tags = function(tags, cb) {
-		this.valid_tags.nuke();
+	this.set_valid_tags = function(tag_names, cb) {
 		var self = this;
-		FuncTools.execute_map(tags, function(_cb) {
-			var tag_name = this;
-			self.valid_tags.save({key:tag_name}, function() {
-				self.tag(tag_name, function(tag_store) {
-					if(tag_store == null) {
-						tag_store = {key:tag_name, unread_count:0};
-						self.tags.save(tag_store, function() {
-							_cb();
-						});
+		// remove deleted tags
+		this.tags.all(function(current_tags) {
+			jQuery.each(current_tags, function(_cb) {
+				var current_tag = this;
+				if(!jQuery.inArray(current_tag.id, tag_names)) {
+					self.tags.remove(current_tag);
+				}
+			});
+			// and add new tags
+			FuncTools.execute_map(tag_names, function(_cb) {
+				var tag_name = this;
+				self.tags.get(tag_name, function(tag) {
+					if(tag == null) {
+						self.tags.save({key:tag_name, entries:[]}, _cb);
 					} else {
 						_cb();
 					}
 				});
-			});
-		}, cb);
+			}, cb);
+		});
 	};
 
 	this.get_all_tags = function(cb) {
@@ -60,6 +62,31 @@ function Store(mode) {
 	this.get_active_tags = function(cb) {
 		this.tags.all(function(tags) {
 			cb(tags);
+		});
+	};
+
+	this.get_tag_counts = function(tags, cb) {
+		var self = this;
+		var tags_with_counts = [];
+		FuncTools.execute_map(tags, function(_cb) {
+			var tag = this;
+			self.tag_count(tag, function(count) {
+				tags_with_counts.push([tag,count]);
+				_cb();
+			});
+		}, function() { cb(tags_with_counts); });
+	};
+
+	this.tag_count = function(tag, cb) {
+		var self=this;
+		self.items.all(function(items) {
+			var count = 0;
+			jQuery.each(items, function() {
+				if(jQuery.inArray(tag.id, this.state.tags)) {
+					count += 1;
+				}
+			});
+			cb(count);
 		});
 	};
 
@@ -87,10 +114,6 @@ function Store(mode) {
 			}
 			if(jQuery.inArray(entry.id, tag.entries) == -1) {
 				tag.entries.push(entry.id);
-				if(!('unread' in tag)) {
-					tag.unread = 0;
-				}
-				tag.unread += 1;
 				entry.key = entry.id;
 				self.items.save(entry, function() {
 					self.tags.save(tag, cb);
@@ -101,34 +124,14 @@ function Store(mode) {
 		});
 	};
 
-	this.propagate_flag = function(entry, flag, newval, cb) {
-		var self=this;
-		if(flag == 'read') {
-			var amount = newval ? 1 : -1;
-			this.tag_store.all(function(tags) {
-				FuncTools.execute_map(tags, function(_cb) {
-					if(jQuery.inArray(entry.id, this.entries)) {
-						this.unread += amount;
-						self.tag_store.save(this, _cb);
-					} else {
-						// nothing to do
-						_cb();
-					}
-				}, cb);
-			});
-		}
-	};
-
 	this.toggle_flag = function(entry, flag, cb) {
 		console.log("adding flag: " + flag + " to entry " + entry);
-		var val = !(entry[flag] || false); // get it, then flip it
-		entry[flag] = val;
+		var val = !(entry.state[flag] || false); // get it, then flip it
+		entry.state[flag] = val;
 		var self = this;
 		this.items.save(entry, function() {
-			self.propagate_flag(entry, flag, val, function() {
-				self.add_action(flag, entry.id, val, function() {
-					cb(val);
-				});
+			self.add_action(flag, entry.id, val, function() {
+				cb(val);
 			});
 		});
 	};
@@ -166,7 +169,6 @@ function Store(mode) {
 			return false;
 		}
 
-		//FIXME: never seems to match an action...
 		this.modify_actions(function(actions) {
 			var index = in_array(params, actions);
 			if(index !== false) {

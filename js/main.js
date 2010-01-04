@@ -24,11 +24,21 @@ function do_sync(no_download) {
 
 function main() {
 	reader = new GoogleReader();
-	// store = new Store('dom');
-	store = new Store();
+	store = new Store('dom');
+	// store = new Store();
 	sync = new Sync(reader, store);
 	ui = new UI(store);
-	store.ifEmpty(do_sync, function() {ui.refresh();});
+	store.ifEmpty(do_sync, function() {
+		var success = false;
+		ui.refresh(function() { success = true; });
+		window.setTimeout(function() {
+			if(!success) {
+				console.log("UI did not load after 5 seconds - forcing a fresh sync");
+				store.clear();
+				do_sync();
+			}
+		}, 5 * 1000);
+	});
 };
 
 $(main);

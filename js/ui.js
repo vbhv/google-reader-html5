@@ -16,17 +16,20 @@ function UI (store){
 		return this.views[name].render(obj);
 	}
 
-	this.reload_tags = function() {
+	this.reload_tags = function(cb) {
 		var self=this;
 		self.tags_dom.empty();
 		this.store.get_all_tags(function(tags) {
-			self.tags_dom.append(self.render('taglist', tags));
+			self.store.get_tag_counts(tags, function(tags_with_counts) {
+				self.tags_dom.append(self.render('taglist', tags_with_counts));
+				cb();
+			});
 		});
 	};
 
-	this.refresh = function() {
+	this.refresh = function(cb) {
 		console.log("UI: refresh...");
-		this.reload_tags();
+		this.reload_tags(cb);
 		//TODO...
 	};
 

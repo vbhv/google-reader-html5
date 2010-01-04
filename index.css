@@ -1,53 +1,4 @@
 body {
-	margin:0;
-	padding:0;
-}
-
-#app {
-	margin:0;
-	position:absolute;
-	top:0;
-	left:0;
-	width:100%;
-	height:100%;
-}
-
-a {
-	cursor: hand;
-}
-
-ul {
-	margin:0;
-	padding:0;
-}
-
-.ui li {
-	border-top:1px solid #eee;
-	border-bottom: 1px solid #777;
-	background-color: #ddd;
-	font-size:1.2em;
-	width: auto;
-	padding: 0.2em;
-}
-
-.toolbar {
-	width:100%;
-	font-size:2em;
-	background: #333;
-	border-top: none;
-	border-bottom: 1px solid #fff;
-	color: #;
-	margin:0;
-}
-
-.toolbar a {
-	margin: 2px 20px;
-}
-
-/****************************/
-
-
-body {
 	font-family: helvetica, sans-serif;
 	background:#333;
 	margin:0;
@@ -93,6 +44,11 @@ pre {
 }
 
 
+.entry-summary.read {
+	opacity:0.8;
+}
+
+/** entry display **/
 .post-info {
 	background:#111;
 	border: 0px solid #666;
@@ -130,5 +86,46 @@ pre {
 .content p {
 	margin-top:10px;
 	margin-bottom:10px;
+}
+
+#app {
+	margin:0;
+	position:absolute;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+}
+
+a {
+	cursor: hand;
+}
+
+ul {
+	margin:0;
+	padding:0;
+}
+
+.ui li {
+	border-top:1px solid #eee;
+	border-bottom: 1px solid #777;
+	background-color: #ddd;
+	font-size:1.2em;
+	width: auto;
+	padding: 0.2em;
+}
+
+.toolbar {
+	width:100%;
+	font-size:2em;
+	background: #333;
+	border-top: none;
+	border-bottom: 1px solid #fff;
+	color: #;
+	margin:0;
+}
+
+.toolbar a {
+	margin: 2px 20px;
 }
 

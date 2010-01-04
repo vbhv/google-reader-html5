@@ -188,7 +188,6 @@ function Store(mode) {
 		var blacklist = [];
 		this.modify_actions(function(actions) {
 			var unique_actions = [];
-			console.log('fdsfs' + JSON.stringify(actions));
 			jQuery.each(actions, function(i) {
 				var action = this;
 				console.log(JSON.stringify(action));

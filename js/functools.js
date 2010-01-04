@@ -7,17 +7,20 @@ FuncTools = {
 			if(chain.length == 0) {
 				return;
 			} else {
-				chain_link(chain, arguments);
+				FuncTools.chain_link(chain, arguments);
 			}
 		}
-		func.apply(null, args + next_call);
+		console.log("next in chain: " + func);
+		args = args.slice();
+		args.push(next_call);
+		func.apply(null, args);
 	},
 
-	chain: function() {
+	chain: function(funcs) {
 		// executes a list of functions, passing
 		// the callback arguments of each call into the
 		// next function in the list
-		chain_link(arguments, []);
+		FuncTools.chain_link(funcs, []);
 	},
 
 	execute_map: function(arr, func, on_complete) {

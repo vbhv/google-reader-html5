@@ -140,12 +140,9 @@ function Store(mode) {
 	};
 
 	this._get_action_info = function(cb) {
-		this.action_store.all(function(action_info_list) {
-			var action_info;
-			if(action_info_list.length == 0) {
+		this.action_store.get(1, function(action_info) {
+			if(action_info == null) {
 				action_info = {key:1, values:[]};
-			} else {
-				action_info = action_info_list[0];
 			}
 			cb(action_info);
 		});

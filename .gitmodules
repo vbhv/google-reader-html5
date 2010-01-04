@@ -1,0 +1,3 @@
+[submodule "ext/lawnchair"]
+	path = ext/lawnchair
+	url = git://github.com/gfxmonk/lawnchair

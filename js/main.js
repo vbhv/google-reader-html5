@@ -11,14 +11,6 @@ function ensure_login(cb){
 		function() { LOGGED_IN = true; cb() });
 };
 
-function init_tags() {
-	reader.get_user_tags(function(tag_list) {
-		jQuery.each(tag_list, function(i) {
-			ui.Tag(tag_list[i], 0);
-		});
-	});
-};
-
 function do_sync(no_download) {
 	ensure_login(function() {
 		var cb = function() { ui.refresh(); };

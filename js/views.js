@@ -146,8 +146,8 @@ function TagListView(ui, tagView) {
 function TagView(ui) {
 	this.ui = ui;
 	this.render = function(e) {
-		var name = e;
-		var num_items = -1;
+		var name = e.key;
+		var num_items = e.unread;
 		var node = mkNode({
 			type:'li',
 			class: "tag",

@@ -59,7 +59,7 @@ function Sync(reader, store) {
 				self.store.get_active_tags(function(active_tags) {
 					FuncTools.execute_map(
 						active_tags, function(_cb) {
-							var tag_name = this;
+							var tag_name = this.key;
 							self.pull_items(tag_name, _cb);
 						}, cb
 					);

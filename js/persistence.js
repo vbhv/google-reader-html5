@@ -39,7 +39,7 @@ function Store(mode) {
 			self.valid_tags.save({key:tag_name}, function() {
 				self.tag(tag_name, function(tag_store) {
 					if(tag_store == null) {
-						tag_store = {key:tag_name};
+						tag_store = {key:tag_name, unread_count:0};
 						self.tags.save(tag_store, function() {
 							_cb();
 						});
@@ -52,14 +52,14 @@ function Store(mode) {
 	};
 
 	this.get_all_tags = function(cb) {
-		this.valid_tags.all(function(tags) {
-			cb(jQuery.map(tags, function(tag){ return tag.key; }));
+		this.tags.all(function(tags) {
+			cb(tags);
 		});
 	};
 
 	this.get_active_tags = function(cb) {
-		this.valid_tags.all(function(tags) {
-			cb(jQuery.map(tags, function(tag){ return tag.key; }));
+		this.tags.all(function(tags) {
+			cb(tags);
 		});
 	};
 
@@ -82,8 +82,15 @@ function Store(mode) {
 	this.add_entry = function(tag_name, entry, cb) {
 		var self=this;
 		this.tag(tag_name, function(tag) {
+			if(tag == null) {
+				console.log("no such tag: " + tag_name);
+			}
 			if(jQuery.inArray(entry.id, tag.entries) == -1) {
 				tag.entries.push(entry.id);
+				if(!('unread' in tag)) {
+					tag.unread = 0;
+				}
+				tag.unread += 1;
 				entry.key = entry.id;
 				self.items.save(entry, function() {
 					self.tags.save(tag, cb);
@@ -94,6 +101,23 @@ function Store(mode) {
 		});
 	};
 
+	this.propagate_flag = function(entry, flag, newval, cb) {
+		var self=this;
+		if(flag == 'read') {
+			var amount = newval ? 1 : -1;
+			this.tag_store.all(function(tags) {
+				FuncTools.execute_map(tags, function(_cb) {
+					if(jQuery.inArray(entry.id, this.entries)) {
+						this.unread += amount;
+						self.tag_store.save(this, _cb);
+					} else {
+						// nothing to do
+						_cb();
+					}
+				}, cb);
+			});
+		}
+	};
 
 	this.toggle_flag = function(entry, flag, cb) {
 		console.log("adding flag: " + flag + " to entry " + entry);
@@ -101,8 +125,10 @@ function Store(mode) {
 		entry[flag] = val;
 		var self = this;
 		this.items.save(entry, function() {
-			self.add_action(flag, entry.id, val, function() {
-				cb(val);
+			self.propagate_flag(entry, flag, val, function() {
+				self.add_action(flag, entry.id, val, function() {
+					cb(val);
+				});
 			});
 		});
 	};
@@ -118,10 +144,32 @@ function Store(mode) {
 	};
 
 	this.remove_action = function(params, cb) {
+		function eq(a, b) {
+			if(a == b) return true;
+			if(!('length' in a && 'length' in b)) return false; // not an array
+			if(a.length != b.length) return false;
+			for(var i=0; i<a.length; i++) {
+				if(!eq(a[i], b[i])) {
+					console.log("elem " + i + " not equal");
+					return false;
+				}
+			}
+			return true;
+		}
+
+		function in_array(needle, haystack) {
+			for(var i = 0; i<haystack.length; i++) {
+				if (eq(needle, haystack[i])) {
+					return i;
+				}
+			}
+			return false;
+		}
+
 		//FIXME: never seems to match an action...
 		this.modify_actions(function(actions) {
-			var index = jQuery.inArray(params, actions);
-			if(index != -1) {
+			var index = in_array(params, actions);
+			if(index !== false) {
 				actions.splice(index, 1); // remove 1 elem from index
 			} else {
 				console.log("all actions: " + JSON.stringify(actions));

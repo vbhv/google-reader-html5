@@ -26,7 +26,7 @@ FuncTools = {
 			return on_complete();
 		}
 		jQuery.each(arr, function() {
-		var elem = this;
+			var elem = this;
 			func.apply(elem, [function() {
 				remaining -= 1;
 				if (remaining == 0) on_complete();

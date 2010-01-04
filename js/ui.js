@@ -29,7 +29,7 @@ function UI (store){
 
 	this.refresh = function(cb) {
 		console.log("UI: refresh...");
-		this.reload_tags(cb);
+		this.reload_tags(cb || function(){});
 		//TODO...
 	};
 

@@ -84,7 +84,7 @@ function EntryListView(ui) {
 
 	this.render = function(e) {
 		var self=this;
-		return mkNode({type: 'li', class:"entry-summary " + e.state.read ? "read" : "unread", children: [
+		return mkNode({type: 'li', class:"entry-summary " + (e.state.read ? "read" : "unread"), children: [
 			{type: 'a', text:e.title, onclick: function() { self.ui.load_entry(e); }},
 		]});
 	};
@@ -131,6 +131,7 @@ function TagListView(ui, tagView) {
 					children: [
 						{ type: 'a', text: 'sync', onclick: function(){do_sync();}, },
 						{ type: 'a', text: 'push', onclick: function(){do_sync(true);}, },
+						{ type: 'a', text: 'clear', onclick: function(){store.clear(); do_sync(true);}, },
 					],
 				},
 				{

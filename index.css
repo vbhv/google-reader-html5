@@ -45,7 +45,12 @@ pre {
 
 
 .entry-summary.read {
-	opacity:0.8;
+	color: #999;
+}
+
+.num_items {
+	float:right;
+	color:#977;
 }
 
 /** entry display **/

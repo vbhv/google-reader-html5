@@ -1,9 +1,31 @@
+function eq(a, b) {
+	if(a == b) return true;
+	if(!(a instanceof Array && b instanceof Array)) return false; // not an array
+	if(a.length != b.length) return false;
+	for(var i=0; i<a.length; i++) {
+		if(!eq(a[i], b[i])) {
+			return false;
+		}
+	}
+	return true;
+}
+
+function in_array(needle, haystack) {
+	for(var i = 0; i<haystack.length; i++) {
+		if (eq(needle, haystack[i])) {
+			return i;
+		}
+	}
+	return false;
+}
+
+
 function Store(mode) {
 	this._table = function(name) {
 		return new Lawnchair({table: name, adaptor: mode});
 	};
 
-	this.tags = this._table('tag');
+	this.tags = this._table('tags');
 	this.feeds = this._table('feeds');
 	this.items = this._table('items');
 	this.resources = this._table('res');
@@ -81,6 +103,7 @@ function Store(mode) {
 		var self=this;
 		self.items.all(function(items) {
 			var count = 0;
+			console.log("item count = " + items.length);
 			jQuery.each(items, function() {
 				if(jQuery.inArray(tag.id, this.state.tags)) {
 					count += 1;
@@ -116,6 +139,7 @@ function Store(mode) {
 				tag.entries.push(entry.id);
 				entry.key = entry.id;
 				self.items.save(entry, function() {
+					console.log("addded item " + entry.id + " to tag " + tag.key + " and now it has " + tag.entries.length);
 					self.tags.save(tag, cb);
 				});
 			} else {
@@ -147,28 +171,6 @@ function Store(mode) {
 	};
 
 	this.remove_action = function(params, cb) {
-		function eq(a, b) {
-			if(a == b) return true;
-			if(!('length' in a && 'length' in b)) return false; // not an array
-			if(a.length != b.length) return false;
-			for(var i=0; i<a.length; i++) {
-				if(!eq(a[i], b[i])) {
-					console.log("elem " + i + " not equal");
-					return false;
-				}
-			}
-			return true;
-		}
-
-		function in_array(needle, haystack) {
-			for(var i = 0; i<haystack.length; i++) {
-				if (eq(needle, haystack[i])) {
-					return i;
-				}
-			}
-			return false;
-		}
-
 		this.modify_actions(function(actions) {
 			var index = in_array(params, actions);
 			if(index !== false) {
@@ -181,10 +183,44 @@ function Store(mode) {
 		}, cb);
 	};
 
+	this.collapse_actions = function(cb) {
+		var reversible = ['read','star'];
+		var blacklist = [];
+		this.modify_actions(function(actions) {
+			var unique_actions = [];
+			console.log('fdsfs' + JSON.stringify(actions));
+			jQuery.each(actions, function(i) {
+				var action = this;
+				console.log(JSON.stringify(action));
+				if(in_array(i, blacklist) !== false) {
+					return;
+				}
+				var remaining_actions = actions.slice(i);
+				if(in_array(action[0], reversible) === false) {
+					unique_actions.push(action);
+					return;
+				}
+				var opposite = action.slice();
+				opposite[2] = !opposite[2];
+				var opposite_index = in_array(opposite, remaining_actions);
+				if(opposite_index === false) {
+					unique_actions.push(action);
+				} else {
+					console.log("dropping action: " + action + " (" + i + ") && " + actions[opposite_index + i] + "( " + (opposite_index + i) + ")");
+					blacklist.push(opposite_index + i);
+				}
+			});
+			return unique_actions;
+		}, cb);
+	};
+
 	this.modify_actions = function(_do, cb) {
 		var self = this;
 		self._get_action_info(function(action_info) {
-			_do(action_info.values);
+			var retval = _do(action_info.values);
+			if (retval instanceof Array) {
+				action_info.values = retval;
+			}
 			self.action_store.save(action_info, cb);
 		});
 	};
@@ -200,8 +236,11 @@ function Store(mode) {
 		
 
 	this.pending_actions = function(cb) {
-		this._get_action_info(function(action_info) {
-			cb(action_info.values);
+		var self=this;
+		this.collapse_actions(function() {
+			self._get_action_info(function(action_info) {
+				cb(action_info.values);
+			});
 		});
 	};
 

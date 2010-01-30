@@ -1,0 +1,135 @@
+		<!-- <script type="text/javascript" src="js/lib/jquery-1.3.2.min.js"></script> -->
+		<script type="text/javascript" src="js/lib/json2.js"></script>
+		<!-- <script type="text/javascript" src="js/functools.js"></script> -->
+		<!-- <script type="text/javascript" src="js/strands/strands.js"></script> -->
+
+		<!-- debug -->
+		<!-- <script type="text/javascript" src="js/debug.jss.js"></script> -->
+
+		<!-- data access -->
+		<!-- <script type="text/javascript" src="js/fetch.jss.js"></script> -->
+
+		<!-- persistance -->
+		<!-- <script type="text/javascript" src="js/lawnchair/adaptors/LawnchairAdaptorHelpers.js"></script> -->
+		<!-- <script type="text/javascript" src="js/lawnchair/adaptors/CookieAdaptor.js"></script> -->
+		<!-- <script type="text/javascript" src="js/lawnchair/adaptors/DOMStorageAdaptor.js"></script> -->
+		<!-- <script type="text/javascript" src="js/lawnchair/adaptors/GearsSQLiteAdaptor.js"></script> -->
+		<!-- <script type="text/javascript" src="js/lawnchair/adaptors/WebkitSQLiteAdaptor.js"></script> -->
+		<!-- <script type="text/javascript" src="js/lawnchair/Lawnchair.js"></script> -->
+
+		<script language="javascript" type="application/javascript;version=1.7" src="js/async.js"></script>
+
+<script language="javascript" type="application/javascript;version=1.7">
+
+function do_thing(x, cb) {
+	window.setTimeout(function() { cb(x + 1); }, 1000);
+}
+
+
+Function.prototype.async = function() {
+	var self = this;
+	var args = arguments;
+	return [async(self), args];
+}
+
+Function.prototype.async_cb = function() {
+	var self=this;
+	var wrapper = function(func_args, cb) {
+		func_args = Array.prototype.slice.call(func_args);
+		func_args = func_args.slice();
+		func_args.push(cb);
+		console.log("async_cb for " + self + " being called with " + func_args);
+		async(self).apply(null, func_args);
+	}
+	return [wrapper, arguments];
+}
+
+
+function normal_func(arg) {
+	/* return 1; */
+	alert("normal before");
+	return 1;
+	/* yield do_thing.async_cb(arg + 1); */
+	alert("normal after");
+}
+
+function takes_args_and_cb([a,b,c], cb) {
+	cb(a + b + c);
+}
+
+/* function returns_yielded_func(a,b,c) { */
+/* 	return yield [takes_args_and_cb.async, a,b,c]; */
+/* } */
+
+function normal_cb_function(a,b,c, cb) {
+	alert("evaluating " + a + "+" + b + "+" + c + " ( = " + (a + b + c) + ")");
+	cb(a + b + c);
+}
+
+function yields_some_value(args, cb) {
+	console.log("about to yield SO HARD");
+	var res = yield normal_cb_function.async_cb(3,3,3);
+	cb(res);
+
+	/* return x; */
+}
+
+/* Function.prototype.wait_on_yield = function() { */
+/* 	return async(this, arguments)(); */
+/* } */
+
+Function.prototype.call_async = function() {
+	var args = arguments;
+	return async(this)(args);
+}
+
+Function.prototype.yield_to_cb = function() {
+	var yielder = this;
+	return [function(_args, cb) {
+		/* console.log(gen); */
+		alert("starting");
+		var gen = yielder.apply(null, _args);
+		var result = gen.next();
+		/* alert(cb); */
+		alert("got a result: " + result);
+		cb(result);
+	}, arguments];
+}
+
+function really_yield_inner(val) {
+	yield normal_cb_function.async_cb(2,2,2);
+}
+
+function really_yield(val) {
+	alert("starting to yield");
+	yield really_yield_inner.just_yield_summin(1);
+	/* yield normal_cb_function.async_cb(2,2,2); */
+}
+
+Function.prototype.just_yield_summin = function() {
+	var yielder = this;
+	var callback = function(args, cb) {
+		var result = yielder.apply(null, args).next();
+		var args = Array.prototype.slice.call(result[1]);
+		args.push(cb);
+		result[0](args);
+	};
+	return [callback, arguments];
+}
+
+
+function main() {
+	/* var x = yield takes_args_and_cb.async(1,2,3); */
+	/* alert("result: " + x); */
+
+	/* var y = yield normal_cb_function.async_cb(1,2,3); */
+	/* alert("result 2: " + y); */
+
+	/* alert("result 3: " + (yield (yields_some_value.async_cb)(1))); */
+	alert("result 4: " + (yield (really_yield.just_yield_summin)(1)));
+}
+
+
+async(main)();
+</script>
+

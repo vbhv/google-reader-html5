@@ -19,42 +19,37 @@ function in_array(needle, haystack) {
 	return false;
 }
 
-
 function Store(mode) {
-	this._table = function(name) {
-		return new Lawnchair({table: name, adaptor: mode});
+	var self = this;
+	self._table = function(name) {
+		var lawnchair = new Lawnchair({table: name, adaptor: mode});
+		return baked_instance(lawnchair);
 	};
 
-	this.tags = this._table('tags');
-	this.feeds = this._table('feeds');
-	this.items = this._table('items');
-	this.resources = this._table('res');
-	this.action_store = this._table('actions');
+	self.tags = self._table('tags');
+	self.feeds = self._table('feeds');
+	self.items = self._table('items');
+	self.resources = self._table('res');
+	self.action_store = self._table('actions');
 
-	this.ifEmpty = function(ifTrue, ifFalse) {
-		this.tags.all(function(tags) {
-			if(tags.length == 0) {
-				ifTrue();
-			} else {
-				ifFalse();
-			}
-		});
+	self.isEmpty = function(cb) {
+		tags = yield self.tags.all.async_cb();
+		cb(tags.length == 0);
 	};
 
-	this.clear = function() {
+	self.clear = function() {
 		jQuery.each([
-			this.tags,
-			this.feeds,
-			this.items,
-			this.resources,
+			self.tags,
+			self.feeds,
+			self.items,
+			self.resources,
 		], function() { this.nuke(); });
 	};
 	
 
-	this.set_valid_tags = function(tag_names, cb) {
-		var self = this;
+	self.set_valid_tags = function(tag_names, cb) {
 		// remove deleted tags
-		this.tags.all(function(current_tags) {
+		self.tags.all(function(current_tags) {
 			jQuery.each(current_tags, function(_cb) {
 				var current_tag = this;
 				if(!jQuery.inArray(current_tag.id, tag_names)) {
@@ -75,20 +70,19 @@ function Store(mode) {
 		});
 	};
 
-	this.get_all_tags = function(cb) {
-		this.tags.all(function(tags) {
+	self.get_all_tags = function(cb) {
+		self.tags.all(function(tags) {
 			cb(tags);
 		});
 	};
 
-	this.get_active_tags = function(cb) {
-		this.tags.all(function(tags) {
+	self.get_active_tags = function(cb) {
+		self.tags.all(function(tags) {
 			cb(tags);
 		});
 	};
 
-	this.get_tag_counts = function(tags, cb) {
-		var self = this;
+	self.get_tag_counts = function(tags, cb) {
 		var tags_with_counts = [];
 		FuncTools.execute_map(tags, function(_cb) {
 			var tag = this;
@@ -99,8 +93,7 @@ function Store(mode) {
 		}, function() { cb(tags_with_counts); });
 	};
 
-	this.tag_count = function(tag, cb) {
-		var self=this;
+	self.tag_count = function(tag, cb) {
 		self.items.all(function(items) {
 			var count = 0;
 			console.log("item count = " + items.length);
@@ -113,9 +106,8 @@ function Store(mode) {
 		});
 	};
 
-	this.tag_with_entries = function(tag, cb) {
-		var self=this;
-		this.tag(tag, function(tag) {
+	self.tag_with_entries = function(tag, cb) {
+		self.tag(tag, function(tag) {
 			var entries = [];
 			FuncTools.execute_map(tag.entries, function(_cb) {
 				self.items.get(this, function(entry) {
@@ -129,9 +121,8 @@ function Store(mode) {
 		});
 	};
 
-	this.add_entry = function(tag_name, entry, cb) {
-		var self=this;
-		this.tag(tag_name, function(tag) {
+	self.add_entry = function(tag_name, entry, cb) {
+		self.tag(tag_name, function(tag) {
 			if(tag == null) {
 				console.log("no such tag: " + tag_name);
 			}
@@ -148,30 +139,29 @@ function Store(mode) {
 		});
 	};
 
-	this.toggle_flag = function(entry, flag, cb) {
+	self.toggle_flag = function(entry, flag, cb) {
 		console.log("adding flag: " + flag + " to entry " + entry);
 		var val = !(entry.state[flag] || false); // get it, then flip it
 		entry.state[flag] = val;
-		var self = this;
-		this.items.save(entry, function() {
+		self.items.save(entry, function() {
 			self.add_action(flag, entry.id, val, function() {
 				cb(val);
 			});
 		});
 	};
 
-	this.add_action = function(action, key, value, cb) {
+	self.add_action = function(action, key, value, cb) {
 		var _arguments = Array.prototype.slice.call(arguments);
 		var cb = _arguments.slice(-1)[0];
 		var args = _arguments.slice(0,-1);
-		this.modify_actions(function(actions) {
+		self.modify_actions(function(actions) {
 			actions.push(args);
 			console.log("added action: " + args);
 		}, cb);
 	};
 
-	this.remove_action = function(params, cb) {
-		this.modify_actions(function(actions) {
+	self.remove_action = function(params, cb) {
+		self.modify_actions(function(actions) {
 			var index = in_array(params, actions);
 			if(index !== false) {
 				actions.splice(index, 1); // remove 1 elem from index
@@ -183,10 +173,10 @@ function Store(mode) {
 		}, cb);
 	};
 
-	this.collapse_actions = function(cb) {
+	self.collapse_actions = function(cb) {
 		var reversible = ['read','star'];
 		var blacklist = [];
-		this.modify_actions(function(actions) {
+		self.modify_actions(function(actions) {
 			var unique_actions = [];
 			jQuery.each(actions, function(i) {
 				var action = this;
@@ -213,8 +203,7 @@ function Store(mode) {
 		}, cb);
 	};
 
-	this.modify_actions = function(_do, cb) {
-		var self = this;
+	self.modify_actions = function(_do, cb) {
 		self._get_action_info(function(action_info) {
 			var retval = _do(action_info.values);
 			if (retval instanceof Array) {
@@ -224,8 +213,8 @@ function Store(mode) {
 		});
 	};
 
-	this._get_action_info = function(cb) {
-		this.action_store.get(1, function(action_info) {
+	self._get_action_info = function(cb) {
+		self.action_store.get(1, function(action_info) {
 			if(action_info == null) {
 				action_info = {key:1, values:[]};
 			}
@@ -234,17 +223,16 @@ function Store(mode) {
 	};
 		
 
-	this.pending_actions = function(cb) {
-		var self=this;
-		this.collapse_actions(function() {
+	self.pending_actions = function(cb) {
+		self.collapse_actions(function() {
 			self._get_action_info(function(action_info) {
 				cb(action_info.values);
 			});
 		});
 	};
 
-	this.tag = function(tag_name, cb) {
-		this.tags.get(tag_name, function(tag) {
+	self.tag = function(tag_name, cb) {
+		self.tags.get(tag_name, function(tag) {
 			if (!tag) { return cb(null); }
 			if(!('entries' in tag)) {
 				tag.entries = [];

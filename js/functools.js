@@ -38,3 +38,47 @@ FuncTools = {
 	},
 
 }
+
+
+Function.prototype.bind = function(binding) {
+	var self = this;
+	return function() {
+		// console.log("applying function " + self + " with this=" + binding + " and " + arguments.length + " args");
+		return self.apply(binding, arguments);
+	};
+};
+
+Function.prototype.async = function() {
+	var self = this;
+	var args = arguments;
+	return [async(self), args];
+}
+
+Function.prototype.async_cb = function() {
+	var self=this;
+	var wrapper = function(func_args, cb) {
+		func_args = Array.prototype.slice.call(func_args);
+		func_args = func_args.slice();
+		func_args.push(cb);
+		// console.log("async_cb for " + self + " being called with " + func_args);
+		async(self).apply(null, func_args);
+	}
+	return [wrapper, arguments];
+}
+
+
+
+
+function baked_instance(instance) {
+	for (var prop in instance) {
+		if(prop in ['toString', 'init']) {
+			continue;
+		}
+		var func = instance[prop];
+		if (func instanceof Function) {
+			instance[prop] = func.bind(instance);
+		}
+	}
+	return instance;
+}
+

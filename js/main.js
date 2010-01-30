@@ -22,23 +22,32 @@ function do_sync(no_download) {
 	});
 }
 
+function Foo() {
+	this.bar = function() { alert(this); }
+	this.toString = function() { return "i am a foo"; }
+}
+
 function main() {
 	reader = new GoogleReader();
-	// store = new Store('dom');
-	store = new Store();
+	store = new Store('dom');
+	store.clear();
+	// store = new Store();
 	sync = new Sync(reader, store);
 	ui = new UI(store);
-	store.ifEmpty(do_sync, function() {
-		var success = false;
-		ui.refresh(function() { success = true; });
-		window.setTimeout(function() {
-			if(!success) {
-				console.log("UI did not load after 5 seconds - forcing a fresh sync");
-				store.clear();
-				do_sync();
-			}
-		}, 5 * 1000);
-	});
+	if (yield store.isEmpty.async_cb()) {
+		console.log("starting a sync");
+		do_sync();
+	} else {
+		// var success = false;
+		// ui.refresh(function() { success = true; });
+		// window.setTimeout(function() {
+		// 	if(!success) {
+		// 		console.log("UI did not load after 5 seconds - forcing a fresh sync");
+		// 		store.clear();
+		// 		do_sync();
+		// 	}
+		// }, 5 * 1000);
+	}
 };
 
-$(main);
+$(function() { async(main)()});

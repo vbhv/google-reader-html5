@@ -1,3 +1,6 @@
 [submodule "ext/lawnchair"]
 	path = ext/lawnchair
 	url = git://github.com/gfxmonk/lawnchair
+[submodule "ext/async"]
+	path = ext/async
+	url = http://github.com/eligrey/async.js.git

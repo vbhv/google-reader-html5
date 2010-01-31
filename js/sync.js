@@ -1,17 +1,17 @@
 function Sync(reader, store) {
-	this.reader = reader;
-	this.store = store;
-	self = this;
+	var self = this;
+	self.reader = reader;
+	self.store = store;
 
-	this.pull_tags = function(cb) {
-		this.reader.get_user_tags(function(tags) {
-			self.store.set_valid_tags(tags, cb);
-		});
+	self.pull_tags = function(cb) {
+		var tags = yield self.reader.get_user_tags.result();
+		yield self.store.set_valid_tags.result(tags);
+		console.log("got all the tags, yo");
+		cb();
 	};
 
-	this.pull_items = function(tag_name, cb) {
-		var self = this;
-		this.reader.get_tag_feed(tag_name, function(feed) {
+	self.pull_items = function(tag_name, cb) {
+		self.reader.get_tag_feed(tag_name, function(feed) {
 			FuncTools.execute_map(
 				feed.entries, function(_single_cb) {
 					var entry = this;
@@ -21,51 +21,46 @@ function Sync(reader, store) {
 		});
 	};
 
-	this.push = function(cb) {
-		var self = this;
-		this.store.pending_actions(function(actions) {
-			FuncTools.execute_map(actions, function(_cb) {
-				var action = this;
-				var name = action[0];
-				var key = action[1];
-				var value = action[2]; //optional, but javascript doesn't care
-				var func = null;
-				if(name == 'star') func = 'set_star';
-				if(name == 'read') func = 'set_read';
-				if(name == 'share') func = 'set_public';
-				if (func == null) {
-					alert("unknown action: " + name);
-					return;
-				}
-				console.log("pushing state [" + name + "=" + value + "] for " + key);
-				self.reader[func](key, value, function(success) {
-					if(success) {
-						this.store.remove_action(action, _cb);
-					} else {
-						console.log("failed: " + name);
-						_cb();
-					}
-				});
-			}, cb);
+	self.push = function(cb) {
+		console.log("pushing");
+		var pending_actions = yield self.store.pending_actions.result();
+		yield map_cb.result(pending_actions, function(_cb) {
+			var action = this;
+			var name = action[0];
+			var key = action[1];
+			var value = action[2]; //optional, but javascript doesn't care
+			var func = null;
+			if(name == 'star') func = 'set_star';
+			if(name == 'read') func = 'set_read';
+			if(name == 'share') func = 'set_public';
+			if (func == null) {
+				alert("unknown action: " + name);
+				return;
+			}
+			console.log("pushing state [" + name + "=" + value + "] for " + key);
+			var success = yield self.reader[func].result(key, value);
+			if(success) {
+				yield self.store.remove_action(action);
+			} else {
+				console.log("failed: " + name);
+			}
+			_cb();
 		});
+		cb();
 	};
 
-	this.run = function(cb) {
-		var self = this;
-		self.push(function() {
-			console.log("SYNC: state pushed!");
-			self.store.clear();
-			self.pull_tags(function () {
-				self.store.get_active_tags(function(active_tags) {
-					FuncTools.execute_map(
-						active_tags, function(_cb) {
-							var tag_name = this.key;
-							self.pull_items(tag_name, _cb);
-						}, cb
-					);
-				});
-			});
+	self.run = function(cb) {
+		console.log("SYNC: run()");
+		yield self.push.result();
+		console.log("SYNC: state pushed!");
+		self.store.clear();
+		console.log("SYNC: cleared!");
+		yield self.pull_tags.result();
+		console.log("SYNC: tags pulled!");
+		var active_tags = self.store.get_active_tags();
+		jQuery.each(active_tags, function() {
+			var tag_name = this.key;
+			yield self.pull_items(tag_name);
 		});
 	};
 }
-

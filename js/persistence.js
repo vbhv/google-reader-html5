@@ -33,7 +33,7 @@ function Store(mode) {
 	self.action_store = self._table('actions');
 
 	self.isEmpty = function(cb) {
-		tags = yield self.tags.all.async_cb();
+		tags = yield self.tags.all.result();
 		cb(tags.length == 0);
 	};
 
@@ -49,24 +49,26 @@ function Store(mode) {
 
 	self.set_valid_tags = function(tag_names, cb) {
 		// remove deleted tags
-		self.tags.all(function(current_tags) {
-			jQuery.each(current_tags, function(_cb) {
-				var current_tag = this;
-				if(!jQuery.inArray(current_tag.id, tag_names)) {
-					self.tags.remove(current_tag);
-				}
-			});
-			// and add new tags
-			FuncTools.execute_map(tag_names, function(_cb) {
-				var tag_name = this;
-				self.tags.get(tag_name, function(tag) {
-					if(tag == null) {
-						self.tags.save({key:tag_name, entries:[]}, _cb);
-					} else {
-						_cb();
-					}
-				});
-			}, cb);
+		console.log("validing feeds");
+		current_tags = yield self.tags.all.result();
+		jQuery.each(current_tags, function() {
+			var current_tag = this;
+			if(!jQuery.inArray(current_tag.id, tag_names)) {
+				self.tags.remove(current_tag);
+			}
+		});
+		console.log("validing feeds: " + tag_names);
+		// and add new tags
+
+		yield map_cb.result(tag_names, function(tag_name, _cb) {
+			console.log("mapper called! with " + tag_name + " and " + _cb);
+			var tag = yield self.tags.get.result(tag_name);
+			if(tag == null) {
+				console.log("adding feed");
+				yield self.tags.save.result({key:tag_name, entries:[]});
+			}
+			console.log("added feed: " + tag_name);
+			_cb();
 		});
 	};
 
@@ -96,7 +98,6 @@ function Store(mode) {
 	self.tag_count = function(tag, cb) {
 		self.items.all(function(items) {
 			var count = 0;
-			console.log("item count = " + items.length);
 			jQuery.each(items, function() {
 				if(jQuery.inArray(tag.id, this.state.tags)) {
 					count += 1;

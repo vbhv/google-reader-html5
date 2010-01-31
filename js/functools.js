@@ -48,20 +48,21 @@ Function.prototype.bind = function(binding) {
 	};
 };
 
-Function.prototype.async = function() {
+Function.prototype.result_raw = function() {
 	var self = this;
 	var args = arguments;
+	console.log("self = " + self);
 	return [async(self), args];
 }
 
-Function.prototype.async_cb = function() {
+Function.prototype.result = function() {
 	var self=this;
 	var wrapper = function(func_args, cb) {
 		func_args = Array.prototype.slice.call(func_args);
 		func_args = func_args.slice();
 		func_args.push(cb);
-		// console.log("async_cb for " + self + " being called with " + func_args);
-		async(self).apply(null, func_args);
+		// console.log("result for " + self + " being called with " + func_args);
+		async(self).apply(this, func_args);
 	}
 	return [wrapper, arguments];
 }
@@ -81,4 +82,17 @@ function baked_instance(instance) {
 	}
 	return instance;
 }
+
+
+
+function map_cb(collection, func, cb) {
+	results = [];
+	console.log("mapping " + collection.length + " objects");
+	for(var i=0; i<collection.length; i++) {
+		console.log(func.result.call(func, collection[i]));
+		results.push(yield func.result.call(func, collection[i]));
+	}
+	cb(results);
+}
+
 

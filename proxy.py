@@ -12,7 +12,7 @@ params = cgi.FieldStorage()
 params = dict((p.name, p.value) for p in params.list)
 
 url = params.pop('url')
-method = 'GET' if not 'method' in params else params.pop('method')
+method = params.pop('method') if 'method' in params else 'GET'
 param_str = urllib.urlencode(params)
 
 if 'FAKE' in params:

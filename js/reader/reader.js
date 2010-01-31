@@ -10,20 +10,20 @@ function GoogleReader() {
 			Passwd: pass,
 			source: GoogleReaderConst.AGENT,
 			'continue': 'http://www.google.com',
-		}
-		_this = this;
+		};
+
 		POST(GoogleReaderConst.URI_LOGIN, data, function(sidinfo) {
-			_this.sid = null;
+			self.sid = null;
 			SID_ID = 'SID=';
 			if (sidinfo.indexOf(SID_ID) != -1) {
 				sid = sidinfo.split(SID_ID)[1]
 				if (sid.indexOf('\n') != -1) {
 					sid = sid.split('\n')[0]
 				}
-				_this.sid = sid
+				self.sid = sid
 				cb();
 			} else {
-				console.log("authentication failed");
+				alert("authentication failed");
 			}
 		});
 	};
@@ -193,7 +193,7 @@ function GoogleReader() {
 				if (parts[2] == 'label') {
 					tag_names.push(name);
 				} else {
-					console.log("feed: " + tag.id);
+					console.log("ignoring feed: " + tag.id);
 				}
 			}
 			cb(tag_names);

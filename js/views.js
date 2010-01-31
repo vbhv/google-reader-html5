@@ -129,9 +129,9 @@ function TagListView(ui, tagView) {
 					type:'div',
 					class: 'toolbar',
 					children: [
-						{ type: 'a', text: 'sync', onclick: function(){do_sync();}, },
-						{ type: 'a', text: 'push', onclick: function(){do_sync(true);}, },
-						{ type: 'a', text: 'clear', onclick: function(){store.clear(); do_sync(true);}, },
+						{ type: 'a', text: 'sync', onclick: function(){do_sync(true);}, },
+						{ type: 'a', text: 'push', onclick: function(){do_sync(false);}, },
+						{ type: 'a', text: 'clear', onclick: function(){store.clear(); do_sync(false);}, },
 					],
 				},
 				{

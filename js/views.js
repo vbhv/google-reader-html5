@@ -33,6 +33,13 @@ function mkNode(props) {
 }
 
 
+var funcd = function(func) {
+	var args = Array.prototype.slice.call(arguments, 1);
+	return function() {
+		async(func).apply(null, args);
+	};
+};
+
 function EntryView(ui) {
 	this.ui = ui;
 
@@ -47,9 +54,9 @@ function EntryView(ui) {
 					type:'div',
 					class: 'toolbar',
 					children: [
-						{type: 'a', text: '^up', onclick: function() { self.ui.show_feed_list(); }},
-						{type: 'a', text: (e.state.read ? 'keep' : 'mark read'), onclick: function() { self.ui.toggle_read(e); }},
-						{type: 'a', text: (e.state.star ? 'remove' : 'add') + ' star', onclick: function() { self.ui.toggle_star(e); }},
+						{type: 'a', text: '^up', onclick: funcd(self.ui.show_feed_list)},
+						{type: 'a', text: (e.state.read ? 'keep' : 'mark read'), onclick: funcd(self.ui.toggle_read, e) },
+						{type: 'a', text: (e.state.star ? 'remove' : 'add') + ' star', onclick: funcd(self.ui.toggle_star, e) },
 					]
 				},
 				{type:'div', class:'post-info header', children: [
@@ -85,7 +92,7 @@ function EntryListView(ui) {
 	this.render = function(e) {
 		var self=this;
 		return mkNode({type: 'li', class:"entry-summary " + (e.state.read ? "read" : "unread"), children: [
-			{type: 'a', text:e.title, onclick: function() { self.ui.load_entry(e); }},
+			{type: 'a', text:e.title, onclick: funcd(self.ui.load_entry, e) },
 		]});
 	};
 }
@@ -106,7 +113,7 @@ function FeedView(ui, entryView) {
 						type: 'div',
 						class: 'toolbar',
 						children: [
-							{type: 'a', onclick: function() { self.ui.show_tags(); }, text: '<back'},
+							{type: 'a', onclick: funcd(self.ui.show_tags), text: '<back'},
 						]
 					},
 					{type:'ul', children: result},
@@ -129,9 +136,9 @@ function TagListView(ui, tagView) {
 					type:'div',
 					class: 'toolbar',
 					children: [
-						{ type: 'a', text: 'sync', onclick: function(){do_sync(true);}, },
-						{ type: 'a', text: 'push', onclick: function(){do_sync(false);}, },
-						{ type: 'a', text: 'clear', onclick: function(){store.clear(); do_sync(false);}, },
+						{ type: 'a', text: 'sync', onclick: funcd(app.do_sync, true), },
+						{ type: 'a', text: 'push', onclick: funcd(app.do_sync, false), },
+						{ type: 'a', text: 'clear', onclick: funcd(app.clear_and_sync, false), },
 					],
 				},
 				{
@@ -154,7 +161,7 @@ function TagView(ui) {
 			type:'li',
 			class: "tag ",
 			children: [
-				{ type: 'a', onclick: function() { ui.load_tag(name); }, children: [
+				{ type: 'a', onclick: funcd(ui.load_tag, name), children: [
 					{ type: 'span', text: name },
 					{ type: 'span', class: 'num_items', text: num_items }
 				]}

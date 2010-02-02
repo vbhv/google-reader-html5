@@ -7,7 +7,7 @@ function main() {
 	var sync = new Sync(reader, store);
 	var ui = new UI(store);
 	app = new App(reader, store, sync, ui);
-	app.main();
+	async(app.main)(function(){});
 };
 
-$(function() { async(main)()});
+$(main);

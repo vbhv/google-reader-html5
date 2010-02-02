@@ -61,7 +61,6 @@ function Store(mode) {
 		// and add new tags
 
 		yield map_cb.result(tag_names, function(tag_name, _cb) {
-			console.log("mapper called! with " + tag_name + " and " + _cb);
 			var tag = yield self.tags.get.result(tag_name);
 			if(tag == null) {
 				console.log("adding feed");
@@ -70,85 +69,69 @@ function Store(mode) {
 			console.log("added feed: " + tag_name);
 			_cb();
 		});
+		cb();
 	};
 
 	self.get_all_tags = function(cb) {
-		self.tags.all(function(tags) {
-			cb(tags);
-		});
+		var tags = yield self.tags.all.result();
+		cb(tags);
 	};
 
 	self.get_active_tags = function(cb) {
-		self.tags.all(function(tags) {
-			cb(tags);
-		});
+		var tags = yield self.tags.all.result();
+		cb(tags);
 	};
 
 	self.get_tag_counts = function(tags, cb) {
-		var tags_with_counts = [];
-		FuncTools.execute_map(tags, function(_cb) {
-			var tag = this;
-			self.tag_count(tag, function(count) {
-				tags_with_counts.push([tag,count]);
-				_cb();
-			});
-		}, function() { cb(tags_with_counts); });
+		var tags_with_counts = yield map_cb.result(tags, function(tag, _cb) {
+			var count = yield self.tag_count.result(tag);
+			_cb([tag,count]);
+		});
+		cb(tags_with_counts);
 	};
 
 	self.tag_count = function(tag, cb) {
-		self.items.all(function(items) {
-			var count = 0;
-			jQuery.each(items, function() {
-				if(jQuery.inArray(tag.id, this.state.tags)) {
-					count += 1;
-				}
-			});
-			cb(count);
+		var items = yield self.items.all.result();
+		var count = 0;
+		jQuery.each(items, function() {
+			if(jQuery.inArray(tag.id, this.state.tags)) {
+				count += 1;
+			}
 		});
+		cb(count);
 	};
 
-	self.tag_with_entries = function(tag, cb) {
-		self.tag(tag, function(tag) {
-			var entries = [];
-			FuncTools.execute_map(tag.entries, function(_cb) {
-				self.items.get(this, function(entry) {
-					entries.push(entry);
-					_cb();
-				});
-			}, function() {
-				tag.entries = entries;
-				cb(tag);
-			});
+	self.tag_with_entries = function(tag_name, cb) {
+		var tag = self.tag.result(tag);
+		var entries = yield map_cb.result(tag.entries, function(_cb) {
+			_cb(yield self.items.get.result(this));
 		});
+		tag.entries = entries;
+		cb(tag);
 	};
 
 	self.add_entry = function(tag_name, entry, cb) {
-		self.tag(tag_name, function(tag) {
-			if(tag == null) {
-				console.log("no such tag: " + tag_name);
-			}
-			if(jQuery.inArray(entry.id, tag.entries) == -1) {
-				tag.entries.push(entry.id);
-				entry.key = entry.id;
-				self.items.save(entry, function() {
-					console.log("addded item " + entry.id + " to tag " + tag.key + " and now it has " + tag.entries.length);
-					self.tags.save(tag, cb);
-				});
-			} else {
-				cb();
-			}
-		});
+		var tag = self.tag.result(tag_name);
+		if(tag == null) {
+			console.log("no such tag: " + tag_name);
+		}
+		if(jQuery.inArray(entry.id, tag.entries) == -1) {
+			tag.entries.push(entry.id);
+			entry.key = entry.id;
+			yield self.items.save.result(entry);
+			console.log("addded item " + entry.id + " to tag " + tag.key + " and now it has " + tag.entries.length);
+			yield self.tags.save.result(tag);
+		}
+		cb();
 	};
 
 	self.toggle_flag = function(entry, flag, cb) {
 		console.log("adding flag: " + flag + " to entry " + entry);
 		var val = !(entry.state[flag] || false); // get it, then flip it
 		entry.state[flag] = val;
-		self.items.save(entry, function() {
-			self.add_action(flag, entry.id, val, function() {
-				cb(val);
-			});
-		});
+		yield self.items.save.result(entry);
+		yield self.add_action(flag, entry.id, val);
+		cb(val);
 	};
 
 	self.add_action = function(action, key, value, cb) {
@@ -225,21 +208,21 @@ function Store(mode) {
 		
 
 	self.pending_actions = function(cb) {
-		self.collapse_actions(function() {
-			self._get_action_info(function(action_info) {
-				cb(action_info.values);
-			});
-		});
+		var collapsed = yield self.collapse_actions.result();
+		collapsed = yield self._get_action_info.result();
+		cb(collapsed.values);
 	};
 
 	self.tag = function(tag_name, cb) {
-		self.tags.get(tag_name, function(tag) {
-			if (!tag) { return cb(null); }
+		var tag = yield self.tags.get.result(tag_name);
+		if (!tag) {
+			cb(null);
+		} else {
 			if(!('entries' in tag)) {
 				tag.entries = [];
 			}
 			cb(tag);
-		});
+		}
 	};
 
 }

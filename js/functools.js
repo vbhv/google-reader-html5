@@ -68,8 +68,6 @@ Function.prototype.result = function() {
 }
 
 
-
-
 function baked_instance(instance) {
 	for (var prop in instance) {
 		if(prop in ['toString', 'init']) {

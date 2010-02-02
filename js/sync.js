@@ -57,10 +57,11 @@ function Sync(reader, store) {
 		console.log("SYNC: cleared!");
 		yield self.pull_tags.result();
 		console.log("SYNC: tags pulled!");
-		var active_tags = self.store.get_active_tags();
+		var active_tags = yield self.store.get_active_tags.result();
 		jQuery.each(active_tags, function() {
 			var tag_name = this.key;
 			yield self.pull_items(tag_name);
 		});
+		cb();
 	};
 }

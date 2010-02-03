@@ -51,7 +51,6 @@ Function.prototype.bind = function(binding) {
 Function.prototype.result_raw = function() {
 	var self = this;
 	var args = arguments;
-	console.log("self = " + self);
 	return [async(self), args];
 }
 
@@ -87,8 +86,10 @@ function map_cb(collection, func, cb) {
 	results = [];
 	console.log("mapping " + collection.length + " objects");
 	for(var i=0; i<collection.length; i++) {
-		console.log(func.result.call(func, collection[i]));
 		results.push(yield func.result.call(func, collection[i]));
+	}
+	if(!(cb instanceof Function)) {
+		console.log("while mapping " + JSON.stringify(collection) + "\n\nwith " + JSON.stringify(func) + " , cb = " + JSON.stringify(cb));
 	}
 	cb(results);
 }

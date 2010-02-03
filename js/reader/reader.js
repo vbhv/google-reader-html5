@@ -166,7 +166,7 @@ function GoogleReader() {
 		self.get_feed({}, cb);
 	};
 
-	self.get_tag_feed = function(tag, cb, opts) {
+	self.get_tag_feed = function(tag, opts, cb) {
 		if (opts == null) {
 			opts = {}
 		}

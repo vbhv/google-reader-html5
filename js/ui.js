@@ -67,10 +67,10 @@ function UI (store){
 
 	self.show = function(dom) {
 		jQuery.each(self.dom_areas, function() {
-			if(self == dom) {
-				self.show();
+			if(this == dom) {
+				this.show();
 			} else {
-				self.hide();
+				this.hide();
 			}
 		});
 	};

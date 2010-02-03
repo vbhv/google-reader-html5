@@ -53,7 +53,7 @@ function Store(mode) {
 		current_tags = yield self.tags.all.result();
 		jQuery.each(current_tags, function() {
 			var current_tag = this;
-			if(!jQuery.inArray(current_tag.id, tag_names)) {
+			if(!in_array(current_tag.id, tag_names)) {
 				self.tags.remove(current_tag);
 			}
 		});
@@ -94,7 +94,7 @@ function Store(mode) {
 		var items = yield self.items.all.result();
 		var count = 0;
 		jQuery.each(items, function() {
-			if(jQuery.inArray(tag.id, this.state.tags)) {
+			if(in_array(tag.key, this.state.tags) !== false) {
 				count += 1;
 			}
 		});
@@ -102,25 +102,26 @@ function Store(mode) {
 	};
 
 	self.tag_with_entries = function(tag_name, cb) {
-		var tag = self.tag.result(tag);
-		var entries = yield map_cb.result(tag.entries, function(_cb) {
-			_cb(yield self.items.get.result(this));
+		var tag = yield self.tag.result(tag_name);
+		var entries = yield map_cb.result(tag.entries, function(entry, _cb) {
+			_cb(yield self.items.get.result(entry));
 		});
 		tag.entries = entries;
 		cb(tag);
 	};
 
 	self.add_entry = function(tag_name, entry, cb) {
-		var tag = self.tag.result(tag_name);
+		var tag = yield self.tag.result(tag_name);
 		if(tag == null) {
-			console.log("no such tag: " + tag_name);
-		}
-		if(jQuery.inArray(entry.id, tag.entries) == -1) {
-			tag.entries.push(entry.id);
-			entry.key = entry.id;
-			yield self.items.save.result(entry);
-			console.log("addded item " + entry.id + " to tag " + tag.key + " and now it has " + tag.entries.length);
-			yield self.tags.save.result(tag);
+			console.log("no such tag: " + JSON.stringify(tag_name));
+		} else {
+			if(!in_array(entry.id, tag.entries)) {
+				tag.entries.push(entry.id);
+				entry.key = entry.id;
+				yield self.items.save.result(entry);
+				console.log("addded item " + entry.id + " to tag " + tag.key + " and now it has " + tag.entries.length);
+				yield self.tags.save.result(tag);
+			}
 		}
 		cb();
 	};

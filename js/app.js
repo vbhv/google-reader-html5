@@ -15,7 +15,7 @@ function App(reader, store, sync, ui) {
 		} else {
 			console.log("no sync needed");
 			var success = false;
-			self.ui.refresh(function() { success = true; cb();});
+			async(self.ui.refresh)(function() { success = true; cb();});
 			window.setTimeout(async(function() {
 				if(!success) {
 					console.log("UI did not load after 5 seconds - forcing a fresh sync");
@@ -43,9 +43,9 @@ function App(reader, store, sync, ui) {
 		cb();
 	};
 
-	self.clear_and_sync = function(do_download) {
+	self.clear_and_sync = function(do_download, cb) {
 		self.store.clear();
-		yield self.sync.result(do_download);
+		yield self.do_sync.result(do_download);
 		cb();
 	};
 

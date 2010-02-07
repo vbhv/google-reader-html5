@@ -21,7 +21,20 @@ function in_array(needle, haystack) {
 
 function Store(mode) {
 	var self = this;
-	self._table = function(name) {
+
+	var entry_converter = {
+		on_save: function(e) {
+			delete e.date;
+		},
+
+		on_load: function(e) {
+			e.date = new Date(e.timestamp);
+		}
+	};
+
+	var null_filter = function() { return true; };
+
+	self._table = function(name, filters) {
 		var lawnchair = new Lawnchair({table: name, adaptor: mode});
 		return baked_instance(lawnchair);
 	};
@@ -82,17 +95,18 @@ function Store(mode) {
 		cb(tags);
 	};
 
-	self.get_tag_counts = function(tags, cb) {
+	self.get_tag_counts = function(tags, filter, cb) {
 		var tags_with_counts = yield map_cb.result(tags, function(tag, _cb) {
-			var count = yield self.tag_count.result(tag);
+			var count = yield self.tag_count.result(tag, filter);
 			_cb([tag,count]);
 		});
 		cb(tags_with_counts);
 	};
 
-	self.tag_count = function(tag, cb) {
+	self.tag_count = function(tag, filter, cb) {
 		var items = yield self.items.all.result();
 		var count = 0;
+		items = items.filter(filter);
 		jQuery.each(items, function() {
 			if(in_array(tag.key, this.state.tags) !== false) {
 				count += 1;
@@ -101,11 +115,14 @@ function Store(mode) {
 		cb(count);
 	};
 
-	self.tag_with_entries = function(tag_name, cb) {
+	self.tag_with_entries = function(tag_name, filter, cb) {
 		var tag = yield self.tag.result(tag_name);
 		var entries = yield map_cb.result(tag.entries, function(entry, _cb) {
-			_cb(yield self.items.get.result(entry));
+			entry = yield self.items.get.result(entry);
+			entry_converter.on_load(entry);
+			_cb(entry);
 		});
+		entries = entries.filter(filter);
 		tag.entries = entries;
 		cb(tag);
 	};
@@ -118,6 +135,7 @@ function Store(mode) {
 			if(!in_array(entry.id, tag.entries)) {
 				tag.entries.push(entry.id);
 				entry.key = entry.id;
+				entry_converter.on_save(entry);
 				yield self.items.save.result(entry);
 				console.log("addded item " + entry.id + " to tag " + tag.key + " and now it has " + tag.entries.length);
 				yield self.tags.save.result(tag);
@@ -127,12 +145,19 @@ function Store(mode) {
 	};
 
 	self.toggle_flag = function(entry, flag, cb) {
-		console.log("adding flag: " + flag + " to entry " + entry);
+		console.log("toggling flag: " + flag + " on entry " + entry);
 		var val = !(entry.state[flag] || false); // get it, then flip it
-		entry.state[flag] = val;
-		yield self.items.save.result(entry);
-		yield self.add_action(flag, entry.id, val);
+		yield self.set_flag.result(entry, flag, val);
 		cb(val);
+	};
+
+	self.set_flag = function(entry, flag, val, cb) {
+		console.log("setting flag: " + flag + " to " + val + " on entry " + entry);
+		entry.state[flag] = val;
+		entry_converter.on_save(entry);
+		yield self.items.save.result(entry);
+		yield self.add_action.result(flag, entry.id, val);
+		cb();
 	};
 
 	self.add_action = function(action, key, value, cb) {

@@ -57,5 +57,9 @@ function App(reader, store, sync, ui) {
 		self.LOGGED_IN = true;
 		cb();
 	};
+
+	self.toggle_show_read = function(cb) {
+		self.ui.entry_filter = self.ui.entry_filter ? null : Entry.is_unread;
+	};
 }
 

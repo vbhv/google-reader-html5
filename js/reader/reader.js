@@ -241,7 +241,9 @@ function Feed(xmlDocument) {
 	this.entries = Array();
 	var self = this;
 	this.doc.find("feed > entry").each(function() {
-		self.entries.push(new Entry(this));
+		var entry = new Entry(this);
+		console.log(entry.date2);
+		self.entries.push(entry);
 	});
 }
 
@@ -257,6 +259,8 @@ function Entry(xml) {
 	this.link = this.doc.children('link').eq(0).attr('href');
 	this.google_id = this.doc.children('id').eq(0).text();
 	this.feed_name = this.doc.children('title').eq(0).text();
+	this.timestamp = Entry.parse_date(this.doc.children('published').eq(0).text()).getTime();
+	// console.log(this.date);
 	this.state = {
 		read: true,
 		star: false,
@@ -288,9 +292,23 @@ function Entry(xml) {
 			}
 		}
 	});
-	this.doc = null; //this causes circular reference errors (somehow)
+	delete this.doc; //this causes circular reference errors (somehow)
 	this.toString = function() {
 		return "ENTRY: " + this.id;
 	};
+}
+
+Entry.is_unread = function(entry) {
+	return !(entry.state.read);
+}
+
+Entry.parse_date = function(str) {
+	if(!str) { return null; }
+	str = str.slice(0,-1);
+	[day, time] = str.split('T');
+	[h,m,s] = time.split(':');
+	[year,month,day] = day.split('-');
+	var date = new Date(Date.UTC(parseInt(year), parseInt(month)-1, parseInt(day), parseInt(h), parseInt(m), parseInt(s)));
+	return date;
 }
 

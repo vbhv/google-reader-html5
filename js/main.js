@@ -11,3 +11,9 @@ function main() {
 };
 
 $(main);
+
+assign = function(x) {
+	result = x;
+	console.log("result = " + JSON.stringify(result));
+}
+

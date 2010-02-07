@@ -103,6 +103,8 @@ function GoogleReader() {
 	};
 
 	self.edit_api = function(edit_operation, arg_mapping, opts, cb) {
+		console.log("reader: not bothering to edit_api: " + edit_operation);
+		return cb(true);
 		var urlargs = {};
 		urlargs['client'] = GoogleReaderConst.AGENT;
 

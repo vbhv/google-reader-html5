@@ -96,23 +96,29 @@ function Store(mode) {
 	};
 
 	self.get_tag_counts = function(tags, filter, cb) {
-		var tags_with_counts = yield map_cb.result(tags, function(tag, _cb) {
-			var count = yield self.tag_count.result(tag, filter);
-			_cb([tag,count]);
+		var all_items = yield self.items.all.result();
+		all_items = all_items.filter(filter);
+
+		// init tag_counts array
+		var tag_counts = {};
+		jQuery.each(tags, function () {
+			tag_counts[this.key] = 0;
+		});
+
+		// add item counts to each of their tags
+		jQuery.each(all_items, function() {
+			var item = this;
+			jQuery.each(item.state.tags, function() {
+				var tag = this;
+				tag_counts[tag] += 1;
+			});
+		});
+
+		// make tuples (to return, keeping tag ordering)
+		var tags_with_counts = jQuery.map(tags, function(tag) {
+			return {tag:tag, count:tag_counts[tag.key]};
 		});
 		cb(tags_with_counts);
-	};
-
-	self.tag_count = function(tag, filter, cb) {
-		var items = yield self.items.all.result();
-		var count = 0;
-		items = items.filter(filter);
-		jQuery.each(items, function() {
-			if(in_array(tag.key, this.state.tags) !== false) {
-				count += 1;
-			}
-		});
-		cb(count);
 	};
 
 	self.tag_with_entries = function(tag_name, filter, cb) {

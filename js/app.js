@@ -60,6 +60,8 @@ function App(reader, store, sync, ui) {
 
 	self.toggle_show_read = function(cb) {
 		self.ui.entry_filter = self.ui.entry_filter ? null : Entry.is_unread;
+		yield self.ui.render_tags.result(false);
+		yield self.ui.render_feed.result(false);
 	};
 }
 

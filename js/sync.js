@@ -36,7 +36,7 @@ function Sync(reader, store) {
 			console.log("pushing state [" + name + "=" + value + "] for " + key);
 			var success = yield self.reader[func].result(key, value);
 			if(success) {
-				yield self.store.remove_action(action);
+				yield self.store.remove_action.result(action);
 			} else {
 				console.log("failed: " + name);
 			}

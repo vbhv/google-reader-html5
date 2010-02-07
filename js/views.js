@@ -79,7 +79,7 @@ function EntryView(ui) {
 					children: [
 						{type: 'a', text: '<<', onclick: funcd(self.ui.show_prev, e) },
 						{type: 'a', text: '>>', onclick: funcd(self.ui.show_next, e) },
-						{type: 'a', text: '^up', onclick: funcd(self.ui.render_feed, null)},
+						{type: 'a', text: '^up', onclick: funcd(self.ui.render_feed, true)},
 						{type: 'a', text: (e.state.read ? 'keep' : 'mark read'), onclick: funcd(self.ui.toggle_read, e) },
 						{type: 'a', text: (e.state.star ? '-' : '+') + ' star', onclick: funcd(self.ui.toggle_star, e) },
 					]
@@ -95,10 +95,20 @@ function EntryView(ui) {
 			]
 		});
 
+
+		var tag_list_nodes = [];
+		var tag_continue = false;
+		jQuery.each(e.state.tags, function() {
+			tag_list_nodes.push({type:'em', text: this});
+			if (tag_continue) {
+				tag_list_nodes.push({type:'span', text: ", "});
+				tag_continue = true;
+			}
+		});
 		var footer = mkNode({
 			type:'p',
 			class: 'post-info footer',
-			text: "posted " + relative_date(e.date) + " in tag {TAG}",
+			children: [{type: "span", text:"posted " + relative_date(e.date) + " in ", children: tag_list_nodes}]
 		});
 
 		var root = mkNode({
@@ -117,12 +127,14 @@ function EntryListView(ui) {
 	this.render = function(e) {
 		var self=this;
 		console.log("entry " + e.title + " is " + e.state.read);
+		var text = e.title;
+		if(e.state.star) { text = "(*) " + text; }
 		return mkNode({
 			type: 'li',
 			class:"entry-summary " + (e.state.read ? "read" : "unread"),
-			onclick: funcd(self.ui.load_entry, e),
+			onclick: funcd(self.ui.render_entry, e),
 			children: [
-				{type: 'a', text:e.title},
+				{type: 'a', text:text},
 				{type: 'span', class:'date', text:relative_date(e.date)},
 			]
 		});
@@ -146,7 +158,8 @@ function FeedView(ui, entryView) {
 						type: 'div',
 						class: 'toolbar',
 						children: [
-							{type: 'a', onclick: funcd(self.ui.show_tags), text: '<back'},
+							{type: 'a', onclick: funcd(self.ui.render_tags, true), text: '<back'},
+							_show_read_button(self),
 						]
 					},
 					{type:'ul', children: result},
@@ -155,6 +168,10 @@ function FeedView(ui, entryView) {
 		});
 	};
 };
+
+function _show_read_button(self) {
+	return { type: 'a', text: (self.ui.entry_filter ? 'show' : 'hide') + ' read', onclick: funcd(app.toggle_show_read, false), }
+}
 
 function TagListView(ui, tagView) {
 	this.ui = ui;
@@ -172,7 +189,7 @@ function TagListView(ui, tagView) {
 						{ type: 'a', text: 'sync', onclick: funcd(app.do_sync, true), },
 						{ type: 'a', text: 'push', onclick: funcd(app.do_sync, false), },
 						{ type: 'a', text: 'clear', onclick: funcd(app.clear_and_sync, false), },
-						{ type: 'a', text: 'show read', onclick: funcd(app.toggle_show_read, false), },
+						_show_read_button(this),
 					],
 				},
 				{
@@ -188,8 +205,11 @@ function TagListView(ui, tagView) {
 function TagView(ui) {
 	this.ui = ui;
 	this.render = function(e) {
-		var tag = e[0];
-		var num_items = e[1];
+		var tag = e.tag;
+		var num_items = e.count;
+		if(num_items == 0) {
+			return null;
+		}
 		var name = tag.key;
 		var node = mkNode({
 			type:'li',

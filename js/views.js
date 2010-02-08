@@ -59,7 +59,7 @@ var funcd = function(func) {
 	var args = Array.prototype.slice.call(arguments, 1);
 	args.push(function(){});
 	return function() {
-		async(func).apply(null, args);
+		func.apply(null, args);
 	};
 };
 

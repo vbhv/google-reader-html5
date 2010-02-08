@@ -1,4 +1,4 @@
-function Sync(reader, store) {
+Sync = function(reader, store) {
 	var self = this;
 	self.reader = reader;
 	self.store = store;
@@ -62,4 +62,4 @@ function Sync(reader, store) {
 		console.log("SYNC: all done");
 		cb();
 	};
-}
+}.Baked();

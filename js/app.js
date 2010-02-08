@@ -1,6 +1,6 @@
 var LOGIN_DETAILS = {};
 
-function App(reader, store, sync, ui) {
+App = function(reader, store, sync, ui) {
 	this.reader = reader;
 	this.store = store;
 	this.ui = ui;
@@ -15,7 +15,7 @@ function App(reader, store, sync, ui) {
 		} else {
 			console.log("no sync needed");
 			var success = false;
-			async(self.ui.refresh)(function() { success = true; cb();});
+			self.ui.refresh(function() { success = true; cb();});
 			window.setTimeout(async(function() {
 				if(!success) {
 					console.log("UI did not load after 5 seconds - forcing a fresh sync");
@@ -63,5 +63,5 @@ function App(reader, store, sync, ui) {
 		yield self.ui.render_tags.result(false);
 		yield self.ui.render_feed.result(false);
 	};
-}
+}.Baked();
 

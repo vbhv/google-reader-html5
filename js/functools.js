@@ -1,42 +1,70 @@
-FuncTools = {
-	chain_link: function(chain, args) {
-		var next_call;
-		var func = chain[0];
-		chain = chain.slice(1);
-		next_call = function() {
-			if(chain.length == 0) {
-				return;
-			} else {
-				FuncTools.chain_link(chain, arguments);
+function eq(a, b) {
+	if(a == b) return true;
+	if(!(a instanceof Array && b instanceof Array)) return false; // not an array
+	if(a.length != b.length) return false;
+	for(var i=0; i<a.length; i++) {
+		if(!eq(a[i], b[i])) {
+			return false;
+		}
+	}
+	return true;
+}
+
+function in_array(needle, haystack) {
+	for(var i = 0; i<haystack.length; i++) {
+		if (eq(needle, haystack[i])) {
+			return i;
+		}
+	}
+	return false;
+}
+
+function __bake(instance) {
+	for(var key in instance) {
+		var prop = instance[key];
+		if(!(prop instanceof Function)) continue;
+		if(prop in ['toString', 'init']) continue;
+		instance[name] = async(prop.bind(__fcd_if_not_enough_arguments_supplied(prop),instance)));
+	}
+	return instance;
+}
+
+Function.prototype.Baked = function() {
+	var Constructor = this;
+	return function() {
+		var instance = new Constructor.apply(this, arguments);
+		return __bake(instance);
+	}
+}
+
+Function.prototype.baked = function(self) {
+	var func = this;
+	return function() {
+		async(__fcd_if_not_enough_arguments_supplied(func)).apply(self, arguments);
+	}
+}
+
+function __fcd_if_not_enough_arguments_supplied(func) {
+	var expected = func.length;
+	return function() {
+		var got = arguments.length;
+		if(got == expected - 1) {
+			debug("wrapping function", func);
+			var wrapper = function(func_args, cb) {
+				func_args = Array.prototype.slice.call(func_args);
+				func_args = func_args.slice();
+				func_args.push(cb);
+				func.apply(this, func_args);
 			}
+			return [wrapper, arguments];
+		} else {
+			if(got != expected) {
+				error("Expected " + expected + " arguments, got " + got + ". Function: " + func);
+			}
+			debug("calling function straight:", func);
+			return func.apply(self, arguments);
 		}
-		console.log("next in chain: " + func);
-		args = args.slice();
-		args.push(next_call);
-		func.apply(null, args);
-	},
-
-	chain: function(funcs) {
-		// executes a list of functions, passing
-		// the callback arguments of each call into the
-		// next function in the list
-		FuncTools.chain_link(funcs, []);
-	},
-
-	execute_map: function(arr, func, on_complete) {
-		var remaining = arr.length;
-		if(remaining == 0) {
-			return on_complete();
-		}
-		jQuery.each(arr, function() {
-			var elem = this;
-			func.apply(elem, [function() {
-				remaining -= 1;
-				if (remaining == 0) on_complete();
-			}]);
-		});
-	},
-
+	}
 }
 
 
@@ -51,7 +79,7 @@ Function.prototype.bind = function(binding) {
 Function.prototype.result_raw = function() {
 	var self = this;
 	var args = arguments;
-	return [async(self), args];
+	return [self, args];
 }
 
 Function.prototype.result = function() {
@@ -61,25 +89,11 @@ Function.prototype.result = function() {
 		func_args = func_args.slice();
 		func_args.push(cb);
 		// console.log("result for " + self + " being called with " + func_args);
-		async(self).apply(this, func_args);
+		self.apply(this, func_args);
 	}
 	return [wrapper, arguments];
 }
-
-
-function baked_instance(instance) {
-	for (var prop in instance) {
-		if(prop in ['toString', 'init']) {
-			continue;
-		}
-		var func = instance[prop];
-		if (func instanceof Function) {
-			instance[prop] = func.bind(instance);
-		}
-	}
-	return instance;
-}
-
+Function.prototype._ = Function.prototype.result;
 
 
 function map_cb(collection, func, cb) {
@@ -89,7 +103,7 @@ function map_cb(collection, func, cb) {
 		results.push(yield func.result.call(func, collection[i]));
 	}
 	if(!(cb instanceof Function)) {
-		console.log("while mapping " + JSON.stringify(collection) + "\n\nwith " + JSON.stringify(func) + " , cb = " + JSON.stringify(cb));
+		error("while mapping " + JSON.stringify(collection) + "\n\nwith " + JSON.stringify(func) + " , cb = " + JSON.stringify(cb));
 	}
 	cb(results);
 }

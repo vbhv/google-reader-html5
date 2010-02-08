@@ -1,4 +1,4 @@
-function UI (store){
+UI = function(store){
 	var self=this;
 	self.store = store;
 	self.tags_dom = jQuery("#tags");
@@ -124,5 +124,5 @@ function UI (store){
 		});
 	};
 
-}
+}.Baked();
 

@@ -1,25 +1,5 @@
-function eq(a, b) {
-	if(a == b) return true;
-	if(!(a instanceof Array && b instanceof Array)) return false; // not an array
-	if(a.length != b.length) return false;
-	for(var i=0; i<a.length; i++) {
-		if(!eq(a[i], b[i])) {
-			return false;
-		}
-	}
-	return true;
-}
-
-function in_array(needle, haystack) {
-	for(var i = 0; i<haystack.length; i++) {
-		if (eq(needle, haystack[i])) {
-			return i;
-		}
-	}
-	return false;
-}
-
-function Store(mode) {
+Lawnchair = Lawnchair.Baked();
+Store = function(mode) {
 	var self = this;
 
 	var entry_converter = {
@@ -35,8 +15,7 @@ function Store(mode) {
 	var null_filter = function() { return true; };
 
 	self._table = function(name, filters) {
-		var lawnchair = new Lawnchair({table: name, adaptor: mode});
-		return baked_instance(lawnchair);
+		return new Lawnchair({table: name, adaptor: mode});
 	};
 
 	self.tags = self._table('tags');
@@ -257,4 +236,4 @@ function Store(mode) {
 		}
 	};
 
-}
+}.Baked();

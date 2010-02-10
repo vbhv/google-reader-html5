@@ -24,49 +24,59 @@ function __bake(instance) {
 		var prop = instance[key];
 		if(!(prop instanceof Function)) continue;
 		if(prop in ['toString', 'init']) continue;
-		instance[name] = async(prop.bind(__fcd_if_not_enough_arguments_supplied(prop),instance)));
+		debug("baking member: " + key);
+		instance[key] = __bake_single_function(prop, instance);
 	}
 	return instance;
 }
 
-Function.prototype.Baked = function() {
-	var Constructor = this;
+function __bake_single_function(func, self) {
+	var expected = func.length;
 	return function() {
-		var instance = new Constructor.apply(this, arguments);
+		var got = arguments.length;
+		var args = Array.slice.call(arguments);
+		debug("function expected " + expected + " args, and got " + got);
+		console.log(args)
+		if(got == expected - 1) {
+			debug("wrapping function", func);
+			var wrapper = function(func_args, cb) {
+				console.log("calling async'd func with: " + func_args + " + " + cb);
+		console.log(JSON.stringify(func_args))
+				func_args = Array.prototype.slice.call(func_args);
+				func_args = func_args.slice();
+				func_args.push(cb);
+				console.log(func + '')
+				return async(func).apply(self, func_args);
+			}
+			return [wrapper, args];
+		} else {
+			if(got != expected) {
+				error("Expected " + expected + " arguments, got " + got + ". Function: " + func);
+			}
+			debug("calling function straight:", func);
+			return async(func).apply(self, arguments);
+		}
+	}
+}
+
+Function.prototype.Baked = function() {
+	var constructor = this;
+	return function() {
+		console.log("Baked constructor called!");
+		if(this === window) {
+			throw "Error: constructor called without using the `new` keyword";
+		}
+		var instance = constructor.apply(this, arguments) || this;
+		console.log("got instance: " + instance + ", baking..");
 		return __bake(instance);
 	}
 }
 
 Function.prototype.baked = function(self) {
 	var func = this;
-	return function() {
-		async(__fcd_if_not_enough_arguments_supplied(func)).apply(self, arguments);
-	}
+	info("baking function: " + func);
+	return __bake_single_function(func, self);
 }
-
-function __fcd_if_not_enough_arguments_supplied(func) {
-	var expected = func.length;
-	return function() {
-		var got = arguments.length;
-		if(got == expected - 1) {
-			debug("wrapping function", func);
-			var wrapper = function(func_args, cb) {
-				func_args = Array.prototype.slice.call(func_args);
-				func_args = func_args.slice();
-				func_args.push(cb);
-				func.apply(this, func_args);
-			}
-			return [wrapper, arguments];
-		} else {
-			if(got != expected) {
-				error("Expected " + expected + " arguments, got " + got + ". Function: " + func);
-			}
-			debug("calling function straight:", func);
-			return func.apply(self, arguments);
-		}
-	}
-}
-
 
 Function.prototype.bind = function(binding) {
 	var self = this;

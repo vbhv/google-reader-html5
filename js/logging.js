@@ -1,4 +1,5 @@
 Logging = new function() {
+	var self = this;
 	var level = 0;
 	var levels = {
 		debug:0,
@@ -7,34 +8,43 @@ Logging = new function() {
 		warn:3,
 		error:4
 	};
-	var self=this;
-	function getlevel = function(lvl_name) {
+	var getlevel = function(lvl_name) {
 		if(!(lvl_name in levels)) {
 			throw("no such level: " + lvl_name);
 		}
 		return levels[lvl_name];
 	};
 
-	this.setlevel = function(lvl_name) {
+	self.setlevel = function(lvl_name) {
 		var lvl = getlevel(lvl_name);
 		level = levels[lvl_name];
 	};
 
-	this.__noSuchMethod__ = function (lvl_name, args) {
+
+	self.__logfunc = function (lvl_name) {
 		var lvl = getlevel(lvl_name);
-		if(lvl >= level) {
-			var str = lvl_name.toUpperCase + ": ";
-			jQuery.each(arguments, function() {
-				str += JSON.stringify(this);
-				str += " ";
+		return function() {
+			var str = lvl_name.toUpperCase() + ": ";
+			if(lvl >= level) {
+				jQuery.each(arguments, function() {
+					str += this;
+					str += " ";
+				});
+				console.log(str);
 			}
-			console.log(str);
-		}
+		};
 	};
+
+	self.debug   = self.__logfunc("debug");
+	self.verbose = self.__logfunc("verbose");
+	self.info    = self.__logfunc("info");
+	self.warn    = self.__logfunc("warn");
+	self.error   = self.__logfunc("error");
+
 }();
 
-debug = Logging.debug;
-verbose = Logging.verbose;
-info = Logging.info;
-warn = Logging.warn;
-error = Logging.error;
+var debug = Logging.debug;
+var verbose = Logging.verbose;
+var info = Logging.info;
+var warn = Logging.warn;
+var error = Logging.error;

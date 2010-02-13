@@ -7,3 +7,6 @@
 [submodule "ext/js-bakery"]
 	path = ext/js-bakery
 	url = ../js-bakery
+[submodule "ext/screw-unit"]
+	path = ext/screw-unit
+	url = git://github.com/nkallen/screw-unit.git

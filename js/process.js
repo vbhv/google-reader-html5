@@ -3,9 +3,9 @@ function Process() {
 
 	this.run(entry, cb) {
 		var body = jQuery(entry.body);
-		yield this.extract_image_urls.result(body);
-		body = yield this.add_alt_text.result(body);
-		yield this.insert_media.result(entry, body);
+		yield this.extract_image_urls(body);
+		body = yield this.add_alt_text(body);
+		yield this.insert_media(entry, body);
 		entry.body = body.toString();
 		cb();
 	};

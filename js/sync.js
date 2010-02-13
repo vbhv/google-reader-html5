@@ -1,18 +1,18 @@
-Sync = function(reader, store) {
+var Sync = function(reader, store) {
 	var self = this;
 	self.reader = reader;
 	self.store = store;
 
 	self.pull_tags = function(cb) {
-		var tags = yield self.reader.get_user_tags.result();
-		yield self.store.set_valid_tags.result(tags);
+		var tags = yield self.reader.get_user_tags();
+		yield self.store.set_valid_tags(tags);
 		cb();
 	};
 
 	self.pull_items = function(tag_name, cb) {
-		var feed = yield self.reader.get_tag_feed.result(tag_name, null);
-		yield map_cb.result(feed.entries, function(entry, _cb) {
-			yield self.store.add_entry.result(tag_name, entry);
+		var feed = yield self.reader.get_tag_feed(tag_name, null);
+		yield map_cb(feed.entries, function(entry, _cb) {
+			yield self.store.add_entry(tag_name, entry);
 			_cb();
 		});
 		cb();
@@ -20,8 +20,9 @@ Sync = function(reader, store) {
 
 	self.push = function(cb) {
 		console.log("pushing");
-		var pending_actions = yield self.store.pending_actions.result();
-		yield map_cb.result(pending_actions, function(action, _cb) {
+		var pending_actions = yield self.store.pending_actions();
+		yield map_cb(pending_actions, function(action, _cb) {
+			info("mappy!")
 			var name = action[0];
 			var key = action[1];
 			var value = action[2]; //optional, but javascript doesn't care
@@ -34,9 +35,9 @@ Sync = function(reader, store) {
 				return;
 			}
 			console.log("pushing state [" + name + "=" + value + "] for " + key);
-			var success = yield self.reader[func].result(key, value);
+			var success = yield self.reader[func](key, value);
 			if(success) {
-				yield self.store.remove_action.result(action);
+				yield self.store.remove_action(action);
 			} else {
 				console.log("failed: " + name);
 			}
@@ -47,19 +48,19 @@ Sync = function(reader, store) {
 
 	self.run = function(cb) {
 		console.log("SYNC: run()");
-		yield self.push.result();
+		yield self.push();
 		console.log("SYNC: state pushed!");
 		self.store.clear();
 		console.log("SYNC: cleared!");
-		yield self.pull_tags.result();
+		yield self.pull_tags();
 		console.log("SYNC: tags pulled!");
-		var active_tags = yield self.store.get_active_tags.result();
+		var active_tags = yield self.store.get_active_tags();
 		console.log("SYNC: there are " + active_tags.length + " active tags");
-		yield map_cb.result(active_tags, function(tag, _cb) {
-			yield self.pull_items.result(tag.key);
+		yield map_cb(active_tags, function(tag, _cb) {
+			yield self.pull_items(tag.key);
 			_cb();
 		});
 		console.log("SYNC: all done");
 		cb();
 	};
-}.Baked();
+}.BakeConstructor();

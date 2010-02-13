@@ -8,6 +8,15 @@ Logging = new function() {
 		warn:3,
 		error:4
 	};
+
+	var output_funcs = {
+		debug: console.log,
+		verbose: console.debug,
+		info: console.info,
+		warn: console.warn,
+		error: console.error
+	};
+
 	var getlevel = function(lvl_name) {
 		if(!(lvl_name in levels)) {
 			throw("no such level: " + lvl_name);
@@ -30,7 +39,7 @@ Logging = new function() {
 					str += this;
 					str += " ";
 				});
-				console.log(str);
+				output_funcs[lvl_name](str);
 			}
 		};
 	};

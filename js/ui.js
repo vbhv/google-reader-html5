@@ -21,30 +21,31 @@ UI = function(store){
 
 	self.reload_tags = function(cb) {
 		self.tags_dom.empty();
-		var tags = yield self.store.get_active_tags.result();
+		var tags = yield self.store.get_active_tags();
 		tags = tags.sort_by('key');
+		debug("UI: got " + tags.length + " tags after reload");
 		self.tags = tags;
-		yield self.render_tags.result(false);
+		yield self.render_tags(false);
 		cb();
 	};
 
 	self.refresh = function(cb) {
 		console.log("UI: refresh...");
-		yield self.reload_tags.result();
+		yield self.reload_tags();
 		//TODO...
 		console.log("UI: refresh complete");
 		cb();
 	};
 
 	self.load_tag = function(tag_name, cb){
-		var feed = yield self.store.tag_with_entries.result(tag_name, self.entry_filter);
+		var feed = yield self.store.tag_with_entries(tag_name, self.entry_filter);
 		self.active_feed = feed;
 		feed.entries = feed.entries.sort_by('date');
 		self.render_feed(true, cb);
 	};
 
 	self.render_tags = function(force_display, cb) {
-		var tags_with_counts = yield self.store.get_tag_counts.result(self.tags, self.entry_filter);
+		var tags_with_counts = yield self.store.get_tag_counts(self.tags, self.entry_filter);
 		self.tags_dom.empty().append(self.render('taglist', tags_with_counts));
 		if (force_display) self.show_tags();
 		cb();
@@ -67,18 +68,18 @@ UI = function(store){
 	self.show_entry = function() { self.show(self.entry_dom); };
 
 	self.show_next = function(current) {
-		yield self.set_read.result(current);
-		yield self.render_entry_offset.result(current, 1);
+		yield self.set_read(current);
+		yield self.render_entry_offset(current, 1);
 	}
 
 	self.show_prev = function(current) {
-		yield self.render_entry_offset.result(current, -1);
+		yield self.render_entry_offset(current, -1);
 	}
 
 	self.render_entry_offset = function(current, offset) {
 		var entry = self.get_entry_offset(current, offset);
 		if(entry == null) {
-			yield self.render_feed.result(true);
+			yield self.render_feed(true);
 		} else {
 			self.render_entry(entry);
 		}
@@ -101,14 +102,14 @@ UI = function(store){
 	};
 
 	self.toggle = function(entry, flag, cb) {
-		yield self.store.toggle_flag.result(entry, flag);
+		yield self.store.toggle_flag(entry, flag);
 		self.update_toolbar(entry);
 		cb();
 	};
 		
-	self.toggle_read = function(entry) { yield self.toggle.result(entry, 'read'); };
-	self.toggle_star = function(entry) { yield self.toggle.result(entry, 'star'); };
-	self.set_read = function(entry, cb) { yield self.store.set_flag.result(entry, 'read', true); cb() };
+	self.toggle_read = function(entry) { yield self.toggle(entry, 'read'); };
+	self.toggle_star = function(entry) { yield self.toggle(entry, 'star'); };
+	self.set_read = function(entry, cb) { yield self.store.set_flag(entry, 'read', true); cb() };
 
 	self.update_toolbar = function(entry) {
 		self.render_entry(self.active_entry);
@@ -124,5 +125,5 @@ UI = function(store){
 		});
 	};
 
-}.Baked();
+}.BakeConstructor();
 

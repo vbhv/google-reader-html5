@@ -32,11 +32,13 @@ function GoogleReader() {
 		data['SID'] = self.sid;
 		GET(url, data, cb, err);
 	};
+	self.GET.doAsync = false;
 
 	self.POST = function(url, data, cb, err) {
 		data['SID'] = self.sid;
 		POST(url, data, cb, err);
 	};
+	self.POST.doAsync = false;
 
 	self.get_token = function(force, cb) {
 		if(force || !self.token) {
@@ -46,6 +48,7 @@ function GoogleReader() {
 			cb(self.token);
 		}
 	};
+	self.get_token.doAsync = false;
 
 	// low-level:
 
@@ -54,10 +57,12 @@ function GoogleReader() {
 		data['client'] = GoogleReaderConst.AGENT;
 		self.GET(url, data, function(obj){ cb(JSON.parse(obj)); });
 	};
+	self.get_api_list.doAsync = false;
 
 	self.get_timestamp = function() {
 		return new Date().getTime();
 	};
+	self.get_timestamp.doAsync = false;
 
 
 	self._translate_args = function(dictionary, googleargs, kwargs) {
@@ -75,6 +80,7 @@ function GoogleReader() {
 			}
 		}
 	};
+	self._translate_args.doAsync = false;
 
 	self.get_feed = function(opts, cb) {
 		// returns a GoogleFeed, giving either an 'url' or a 'feed' internal name.
@@ -101,6 +107,7 @@ function GoogleReader() {
 		}
 		self.GET(feedurl, urlargs, inner_cb);
 	};
+	self.get_feed.doAsync = false;
 
 	self.edit_api = function(edit_operation, arg_mapping, opts, cb) {
 		console.log("reader: not bothering to edit_api: " + edit_operation);
@@ -134,10 +141,11 @@ function GoogleReader() {
 			});
 		});
 	};
+	self.edit_api.doAsync = false;
 
 	// medium-level
 
-	self.get_subscription_list = function() {
+	self.get_subscription_list = function(cb) {
 		//get_subscription_list' returns a structure containing subscriptions.
 		self.get_api_list(GoogleReaderConst.URI_PREFIXE_API + GoogleReaderConst.API_LIST_SUBSCRIPTION, cb);
 	}

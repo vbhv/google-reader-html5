@@ -4,3 +4,6 @@
 [submodule "ext/async"]
 	path = ext/async
 	url = http://github.com/eligrey/async.js.git
+[submodule "ext/js-bakery"]
+	path = ext/js-bakery
+	url = ../js-bakery

@@ -1,4 +1,4 @@
-Lawnchair = Lawnchair.Baked();
+Lawnchair = Lawnchair.BakeConstructor();
 Store = function(mode) {
 	var self = this;
 
@@ -25,7 +25,7 @@ Store = function(mode) {
 	self.action_store = self._table('actions');
 
 	self.isEmpty = function(cb) {
-		tags = yield self.tags.all.result();
+		tags = yield self.tags.all();
 		cb(tags.length == 0);
 	};
 
@@ -42,7 +42,7 @@ Store = function(mode) {
 	self.set_valid_tags = function(tag_names, cb) {
 		// remove deleted tags
 		console.log("validing feeds");
-		current_tags = yield self.tags.all.result();
+		current_tags = yield self.tags.all();
 		jQuery.each(current_tags, function() {
 			var current_tag = this;
 			if(!in_array(current_tag.id, tag_names)) {
@@ -52,11 +52,11 @@ Store = function(mode) {
 		console.log("validing feeds: " + tag_names);
 		// and add new tags
 
-		yield map_cb.result(tag_names, function(tag_name, _cb) {
-			var tag = yield self.tags.get.result(tag_name);
+		yield map_cb(tag_names, function(tag_name, _cb) {
+			var tag = yield self.tags.get(tag_name);
 			if(tag == null) {
 				console.log("adding feed");
-				yield self.tags.save.result({key:tag_name, entries:[]});
+				yield self.tags.save({key:tag_name, entries:[]});
 			}
 			console.log("added feed: " + tag_name);
 			_cb();
@@ -65,17 +65,17 @@ Store = function(mode) {
 	};
 
 	self.get_all_tags = function(cb) {
-		var tags = yield self.tags.all.result();
+		var tags = yield self.tags.all();
 		cb(tags);
 	};
 
 	self.get_active_tags = function(cb) {
-		var tags = yield self.tags.all.result();
+		var tags = yield self.tags.all();
 		cb(tags);
 	};
 
 	self.get_tag_counts = function(tags, filter, cb) {
-		var all_items = yield self.items.all.result();
+		var all_items = yield self.items.all();
 		all_items = all_items.filter(filter);
 
 		// init tag_counts array
@@ -101,9 +101,9 @@ Store = function(mode) {
 	};
 
 	self.tag_with_entries = function(tag_name, filter, cb) {
-		var tag = yield self.tag.result(tag_name);
-		var entries = yield map_cb.result(tag.entries, function(entry, _cb) {
-			entry = yield self.items.get.result(entry);
+		var tag = yield self.tag(tag_name);
+		var entries = yield map_cb(tag.entries, function(entry, _cb) {
+			entry = yield self.items.get(entry);
 			entry_converter.on_load(entry);
 			_cb(entry);
 		});
@@ -113,7 +113,7 @@ Store = function(mode) {
 	};
 
 	self.add_entry = function(tag_name, entry, cb) {
-		var tag = yield self.tag.result(tag_name);
+		var tag = yield self.tag(tag_name);
 		if(tag == null) {
 			console.log("no such tag: " + JSON.stringify(tag_name));
 		} else {
@@ -121,9 +121,9 @@ Store = function(mode) {
 				tag.entries.push(entry.id);
 				entry.key = entry.id;
 				entry_converter.on_save(entry);
-				yield self.items.save.result(entry);
+				yield self.items.save(entry);
 				console.log("addded item " + entry.id + " to tag " + tag.key + " and now it has " + tag.entries.length);
-				yield self.tags.save.result(tag);
+				yield self.tags.save(tag);
 			}
 		}
 		cb();
@@ -132,7 +132,7 @@ Store = function(mode) {
 	self.toggle_flag = function(entry, flag, cb) {
 		console.log("toggling flag: " + flag + " on entry " + entry);
 		var val = !(entry.state[flag] || false); // get it, then flip it
-		yield self.set_flag.result(entry, flag, val);
+		yield self.set_flag(entry, flag, val);
 		cb(val);
 	};
 
@@ -140,8 +140,8 @@ Store = function(mode) {
 		console.log("setting flag: " + flag + " to " + val + " on entry " + entry);
 		entry.state[flag] = val;
 		entry_converter.on_save(entry);
-		yield self.items.save.result(entry);
-		yield self.add_action.result(flag, entry.id, val);
+		yield self.items.save(entry);
+		yield self.add_action(flag, entry.id, val);
 		cb();
 	};
 
@@ -219,13 +219,13 @@ Store = function(mode) {
 		
 
 	self.pending_actions = function(cb) {
-		var collapsed = yield self.collapse_actions.result();
-		collapsed = yield self._get_action_info.result();
+		var collapsed = yield self.collapse_actions();
+		collapsed = yield self._get_action_info();
 		cb(collapsed.values);
 	};
 
 	self.tag = function(tag_name, cb) {
-		var tag = yield self.tags.get.result(tag_name);
+		var tag = yield self.tags.get(tag_name);
 		if (!tag) {
 			cb(null);
 		} else {
@@ -236,4 +236,4 @@ Store = function(mode) {
 		}
 	};
 
-}.Baked();
+}.BakeConstructor();

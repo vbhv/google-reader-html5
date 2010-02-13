@@ -1,10 +1,11 @@
 var LOGIN_DETAILS = {};
 
-App = function(reader, store, sync, ui) {
+App = function(reader, store, sync, ui, processor) {
 	this.reader = reader;
 	this.store = store;
 	this.ui = ui;
 	this.sync = sync
+	this.processor = processor;
 	this.LOGGED_IN = false;
 	var self=this;
 

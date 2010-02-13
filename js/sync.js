@@ -1,7 +1,8 @@
-var Sync = function(reader, store) {
+var Sync = function(reader, store, processor) {
 	var self = this;
 	self.reader = reader;
 	self.store = store;
+	self.processor = processor;
 
 	self.pull_tags = function(cb) {
 		var tags = yield self.reader.get_user_tags();
@@ -12,6 +13,7 @@ var Sync = function(reader, store) {
 	self.pull_items = function(tag_name, cb) {
 		var feed = yield self.reader.get_tag_feed(tag_name, null);
 		yield map_cb(feed.entries, function(entry, _cb) {
+			yield processor.run(entry);
 			yield self.store.add_entry(tag_name, entry);
 			_cb();
 		});

@@ -270,7 +270,10 @@ function Entry(xml) {
 	this.google_id = this.doc.children('id').eq(0).text();
 	this.feed_name = this.doc.children('title').eq(0).text();
 	this.timestamp = Entry.parse_date(this.doc.children('published').eq(0).text()).getTime();
-	// console.log(this.date);
+
+	this.media = this.doc.children('media:content').attr('url').get();
+	this.media.concat(this.doc.children('link[rel=enclosure]').attr('href').get());
+
 	this.state = {
 		read: true,
 		star: false,

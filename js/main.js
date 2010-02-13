@@ -4,11 +4,12 @@ Logging.setlevel('debug');
 main = function() {
 	GoogleReader = GoogleReader.BakeConstructor();
 	var reader = new GoogleReader();
+	var processor = new Processor();
 	var store = new Store('dom');
 	// store = new Store();
-	var sync = new Sync(reader, store);
+	var sync = new Sync(reader, store, processor);
 	var ui = new UI(store);
-	app = new App(reader, store, sync, ui);
+	app = new App(reader, store, sync, ui, processor);
 	app.main(NULL_CB);
 }.bake();
 

@@ -1,23 +1,15 @@
-Screw.Unit(function() {
+$(document).ready(function(){
 
 	function todo() {
-		expect("not yet complete").to(equal, "done");
+		equals("not yet complete", "done");
 	};
 
-	describe("processor", function() {
-		var mock_store;
+	(function() {
 		var processor;
-		var added_urls;
-
-		before(function(){
-			added_urls = [];
-			mock_store = {
-				add_image: function(url, cb) {
-					added_urls.push(url);
-					cb();
-				}.bake(),
-			};
-			processor = new Processor(mock_store);
+		module("processor", {
+			setup: function(){
+				processor = new Processor({});
+			},
 		});
 
 		var process = function(entry) {
@@ -27,68 +19,71 @@ Screw.Unit(function() {
 			return processor.run(entry);
 		};
 
-		it("should extract image URLs", function() {
-			expect(process({
+		test("should extract image URLs", function() {
+			same(process({
 				body: '<p>Some nested image: <img src="http://example.com/image1" alt="blah" /></p> and a top level: <img src="http://example.com/queryImage?x=y"> as well.',
-			}).images).to(equal, ['http://example.com/image1', 'http://example.com/queryImage']);
+			}).images, ['http://example.com/image1', 'http://example.com/queryImage']);
 		});
 
-		it("should insert ALT text beneath inline images", function() {
-			expect(process({
+		test("should insert ALT text beneath inline images", function() {
+			equals(process({
 				body: '<p><img src="#foo" alt="blah"></p>',
-			}).body).to(equal,  '<p><img src="#foo" alt="blah"><div><em>blah</em><p> </p></div></p>');
+			}).body,  '<p><img src="#foo" alt="blah"><div><em>blah</em><p> </p></div></p>');
 
-			expect(process({
+			equals(process({
 				body: 'and a top level: <img src="#foo" alt="x"> as well.',
-			}).body).to(equal,  'and a top level: <img src="#foo" alt="x"><div><em>x</em><p> </p></div> as well.');
+			}).body,  'and a top level: <img src="#foo" alt="x"><div><em>x</em><p> </p></div> as well.');
 
 			var content = 'no alt text: <img src="foo">';
-			expect(process({
+			equals(process({
 				body: content,
-			}).body).to(equal, content);
+			}).body, content);
 		});
 
-		it("should insert enclosure-based images", function(){
-			expect(process({
+		test("should insert enclosure-based images", function(){
+			equals(process({
 				body: '<p>text!</p>',
 				media: ['image1.JPEG', 'image2.jpg?q=x', 'audio.mp3'],
-			}).body).to(equal,  '<p>text!</p><ul class="enclosure"><li><img src="image1.JPEG"></li><li><img src="image2.jpg"></li></ul>');
+			}).body,  '<p>text!</p><ul class="enclosure"><li><img src="image1.JPEG"></li><li><img src="image2.jpg"></li></ul>');
+		});
+
+	})();
+
+
+	(function() {
+		module("entry construction");
+
+		test("should extract media elements", function(){
+			todo();
+		});
+
+		test("should extract enclosure elements", function(){
+			todo();
+		});
+
+		test("should singular values", function(){
+			todo();
+		});
+
+		test("should extract categories", function(){
+			todo();
+		});
+
+		test("should use 'summary' if body is not present", function(){
+			todo();
+		});
+
+		test("should extract & construct date", function(){
+			todo();
+		});
+
+		test("should set a default state", function(){
+			todo();
 		});
 
 	});
 
-
-
-	describe("entry construction", function(){
-
-		it("should extract media elements", function(){
-			todo();
-		});
-
-		it("should extract enclosure elements", function(){
-			todo();
-		});
-
-		it("should singular values", function(){
-			todo();
-		});
-
-		it("should extract categories", function(){
-			todo();
-		});
-
-		it("should use 'summary' if body is not present", function(){
-			todo();
-		});
-
-		it("should extract & construct date", function(){
-			todo();
-		});
-
-		it("should set a default state", function(){
-			todo();
-		});
-
-	});
 });
+
+
 

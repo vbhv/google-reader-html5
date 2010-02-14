@@ -10,3 +10,6 @@
 [submodule "ext/screw-unit"]
 	path = ext/screw-unit
 	url = git://github.com/nkallen/screw-unit.git
+[submodule "ext/dchelimsky-screw-unit"]
+	path = ext/dchelimsky-screw-unit
+	url = git://github.com/dchelimsky/screw-unit.git

@@ -11,15 +11,15 @@ App = function(reader, store, sync, ui, processor) {
 
 	self.main = function(cb) {
 		if (yield self.store.isEmpty()) {
-			console.log("starting a sync");
+			info("starting a sync");
 			yield self.do_sync(true);
 		} else {
-			console.log("no sync needed");
+			verbose("no sync needed");
 			var success = false;
 			self.ui.refresh(function() { success = true; cb();});
 			window.setTimeout(async(function() {
 				if(!success) {
-					console.log("UI did not load after 5 seconds - forcing a fresh sync");
+					warn("UI did not load after 5 seconds - forcing a fresh sync");
 					self.store.clear();
 					yield self.do_sync(true);
 					cb();
@@ -31,15 +31,14 @@ App = function(reader, store, sync, ui, processor) {
 
 	self.do_sync = function(do_download, cb) {
 		yield self.ensure_login();
-		console.log("log")
 		if(do_download) {
-			console.log("run!")
+			verbose("run!")
 			yield self.sync.run();
 		} else {
-			console.log("push!")
+			verbose("push!")
 			yield self.sync.push();
 		}
-		console.log("now for a refresh")
+		debug("now for a refresh")
 		yield self.ui.refresh();
 		cb();
 	};

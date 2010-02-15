@@ -126,7 +126,7 @@ function EntryListView(ui) {
 
 	this.render = function(e) {
 		var self=this;
-		console.log("entry " + e.title + " is " + e.state.read);
+		debug("entry " + e.title + " is " + e.state.read ? 'read' : 'unread');
 		var text = e.title;
 		if(e.state.star) { text = "(*) " + text; }
 		return mkNode({
@@ -146,7 +146,7 @@ function FeedView(ui, entryView) {
 
 	this.render = function(e) {
 		var self = this;
-		console.log("rendering feed: " + e.key);
+		verbose("rendering feed: " + e.key);
 
 		var result = jQuery.map(e.entries, function(entry) {
 			return entryView.render(entry);

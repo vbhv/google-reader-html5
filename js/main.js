@@ -17,6 +17,6 @@ $(function() {main();});
 
 assign = function(x) {
 	result = x;
-	console.log("result = " + JSON.stringify(result));
+	info("result = " + JSON.stringify(result));
 }
 

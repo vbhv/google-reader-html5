@@ -30,10 +30,10 @@ UI = function(store){
 	};
 
 	self.refresh = function(cb) {
-		console.log("UI: refresh...");
+		info("UI: refresh...");
 		yield self.reload_tags();
 		//TODO...
-		console.log("UI: refresh complete");
+		verbose("UI: refresh complete");
 		cb();
 	};
 

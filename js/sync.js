@@ -21,7 +21,7 @@ var Sync = function(reader, store, processor) {
 	};
 
 	self.push = function(cb) {
-		console.log("pushing");
+		verbose("pushing");
 		var pending_actions = yield self.store.pending_actions();
 		yield map_cb(pending_actions, function(action, _cb) {
 			info("mappy!")
@@ -36,12 +36,12 @@ var Sync = function(reader, store, processor) {
 				alert("unknown action: " + name);
 				return;
 			}
-			console.log("pushing state [" + name + "=" + value + "] for " + key);
+			verbose("pushing state [" + name + "=" + value + "] for " + key);
 			var success = yield self.reader[func](key, value);
 			if(success) {
 				yield self.store.remove_action(action);
 			} else {
-				console.log("failed: " + name);
+				error("failed pushing state: " + name);
 			}
 			_cb();
 		});
@@ -49,20 +49,20 @@ var Sync = function(reader, store, processor) {
 	};
 
 	self.run = function(cb) {
-		console.log("SYNC: run()");
+		info("SYNC: run()");
 		yield self.push();
-		console.log("SYNC: state pushed!");
+		info("SYNC: state pushed!");
 		self.store.clear();
-		console.log("SYNC: cleared!");
+		info("SYNC: cleared!");
 		yield self.pull_tags();
-		console.log("SYNC: tags pulled!");
+		info("SYNC: tags pulled!");
 		var active_tags = yield self.store.get_active_tags();
-		console.log("SYNC: there are " + active_tags.length + " active tags");
+		verbose("SYNC: there are " + active_tags.length + " active tags");
 		yield map_cb(active_tags, function(tag, _cb) {
 			yield self.pull_items(tag.key);
 			_cb();
 		});
-		console.log("SYNC: all done");
+		info("SYNC: all done");
 		cb();
 	};
 }.BakeConstructor();

@@ -31,7 +31,7 @@ Function.prototype.result = function() {
 		func_args = Array.prototype.slice.call(func_args);
 		func_args = func_args.slice();
 		func_args.push(cb);
-		// console.log("result for " + self + " being called with " + func_args);
+		// debug("result for " + self + " being called with " + func_args);
 		async(self).apply(this, func_args);
 	}
 	return [wrapper, arguments];

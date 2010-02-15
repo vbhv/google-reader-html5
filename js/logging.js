@@ -1,4 +1,13 @@
 Logging = new function() {
+	var _null = function() {};
+	var _console = console ? console : {
+		log: _null,
+		debug: _null,
+		info: _null,
+		warn: _null,
+		error: alert,
+	};
+
 	var self = this;
 	var level = 0;
 	var levels = {
@@ -10,11 +19,11 @@ Logging = new function() {
 	};
 
 	var output_funcs = {
-		debug: console.log,
-		verbose: console.debug,
-		info: console.info,
-		warn: console.warn,
-		error: console.error
+		debug:   _console.log,
+		verbose: _console.debug,
+		info:    _console.info,
+		warn:    _console.warn,
+		error:   _console.error
 	};
 
 	var getlevel = function(lvl_name) {

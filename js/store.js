@@ -41,7 +41,6 @@ Store = function(mode) {
 
 	self.set_valid_tags = function(tag_names, cb) {
 		// remove deleted tags
-		console.log("validing feeds");
 		current_tags = yield self.tags.all();
 		jQuery.each(current_tags, function() {
 			var current_tag = this;
@@ -49,16 +48,14 @@ Store = function(mode) {
 				self.tags.remove(current_tag);
 			}
 		});
-		console.log("validing feeds: " + tag_names);
-		// and add new tags
 
+		// and add new tags
 		yield map_cb(tag_names, function(tag_name, _cb) {
 			var tag = yield self.tags.get(tag_name);
 			if(tag == null) {
-				console.log("adding feed");
 				yield self.tags.save({key:tag_name, entries:[]});
 			}
-			console.log("added feed: " + tag_name);
+			debug("added feed: " + tag_name);
 			_cb();
 		});
 		cb();
@@ -115,14 +112,14 @@ Store = function(mode) {
 	self.add_entry = function(tag_name, entry, cb) {
 		var tag = yield self.tag(tag_name);
 		if(tag == null) {
-			console.log("no such tag: " + JSON.stringify(tag_name));
+			warn("no such tag: " + JSON.stringify(tag_name));
 		} else {
 			if(!in_array(entry.id, tag.entries)) {
 				tag.entries.push(entry.id);
 				entry.key = entry.id;
 				entry_converter.on_save(entry);
 				yield self.items.save(entry);
-				console.log("addded item " + entry.id + " to tag " + tag.key + " and now it has " + tag.entries.length);
+				verbose("addded item " + entry.id + " to tag " + tag.key + " and now it has " + tag.entries.length);
 				yield self.tags.save(tag);
 			}
 		}
@@ -130,14 +127,14 @@ Store = function(mode) {
 	};
 
 	self.toggle_flag = function(entry, flag, cb) {
-		console.log("toggling flag: " + flag + " on entry " + entry);
+		verbose("toggling flag: " + flag + " on entry " + entry);
 		var val = !(entry.state[flag] || false); // get it, then flip it
 		yield self.set_flag(entry, flag, val);
 		cb(val);
 	};
 
 	self.set_flag = function(entry, flag, val, cb) {
-		console.log("setting flag: " + flag + " to " + val + " on entry " + entry);
+		info("setting flag: " + flag + " to " + val + " on entry " + entry);
 		entry.state[flag] = val;
 		entry_converter.on_save(entry);
 		yield self.items.save(entry);
@@ -151,7 +148,7 @@ Store = function(mode) {
 		var args = _arguments.slice(0,-1);
 		self.modify_actions(function(actions) {
 			actions.push(args);
-			console.log("added action: " + args);
+			debug("added action: " + args);
 		}, cb);
 	};
 
@@ -161,9 +158,8 @@ Store = function(mode) {
 			if(index !== false) {
 				actions.splice(index, 1); // remove 1 elem from index
 			} else {
-				console.log("all actions: " + JSON.stringify(actions));
-				console.log("ERROR: action not found to delete: " + JSON.stringify(params));
-				alert("ERROR: action not found to delete: " + JSON.stringify(params));
+				debug("all actions: " + JSON.stringify(actions));
+				error("action not found to delete: " + JSON.stringify(params));
 			}
 		}, cb);
 	};
@@ -175,7 +171,6 @@ Store = function(mode) {
 			var unique_actions = [];
 			jQuery.each(actions, function(i) {
 				var action = this;
-				console.log(JSON.stringify(action));
 				if(in_array(i, blacklist) !== false) {
 					return;
 				}
@@ -190,7 +185,7 @@ Store = function(mode) {
 				if(opposite_index === false) {
 					unique_actions.push(action);
 				} else {
-					console.log("dropping action: " + action + " (" + i + ") && " + actions[opposite_index + i] + "( " + (opposite_index + i) + ")");
+					verbose("dropping action: " + action + " (" + i + ") && " + actions[opposite_index + i] + "( " + (opposite_index + i) + ")");
 					blacklist.push(opposite_index + i);
 				}
 			});

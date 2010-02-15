@@ -110,7 +110,7 @@ function GoogleReader() {
 	self.get_feed.doAsync = false;
 
 	self.edit_api = function(edit_operation, arg_mapping, opts, cb) {
-		console.log("reader: not bothering to edit_api: " + edit_operation);
+		warn("reader: not bothering to edit_api: " + edit_operation);
 		return cb(true);
 		var urlargs = {};
 		urlargs['client'] = GoogleReaderConst.AGENT;
@@ -203,7 +203,7 @@ function GoogleReader() {
 				if (parts[2] == 'label') {
 					tag_names.push(name);
 				} else {
-					console.log("ignoring feed: " + tag.id);
+					verbose("ignoring feed: " + tag.id);
 				}
 			}
 			cb(tag_names);
@@ -304,7 +304,7 @@ function Entry(xml) {
 					self.state.publish = true;
 				}
 			} else {
-				console.log("unknown category type: " + type);
+				info("unknown category type: " + type);
 			}
 		}
 	});

@@ -252,7 +252,6 @@ function Feed(xmlDocument) {
 	var self = this;
 	this.doc.find("feed > entry").each(function() {
 		var entry = new Entry(this);
-		console.log(entry.date2);
 		self.entries.push(entry);
 	});
 }
@@ -271,8 +270,12 @@ function Entry(xml) {
 	this.feed_name = this.doc.children('title').eq(0).text();
 	this.timestamp = Entry.parse_date(this.doc.children('published').eq(0).text()).getTime();
 
-	this.media = this.doc.children('media:content').attr('url').get();
-	this.media.concat(this.doc.children('link[rel=enclosure]').attr('href').get());
+	var media_nodes = this.doc.children('media:content').attr('url');
+	this.media = media_nodes ? media_nodes.get() : [];
+	var enclosure_nodes = this.doc.children('link[rel=enclosure]').attr('href');
+	if(enclosure_nodes) {
+		this.media.concat(enclosure_nodes.get());
+	}
 
 	this.state = {
 		read: true,

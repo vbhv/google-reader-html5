@@ -33,9 +33,7 @@ var Processor = function(store) {
 	}
 	
 	this.add_alt_text = function(content) {
-		console.log("content: " + content)
 		jQuery(content).find("img").each(function() {
-			console.log("img: " + this)
 			var subtitle = _subtitle(this);
 			if(subtitle != null) {
 				jQuery(this).after(subtitle);

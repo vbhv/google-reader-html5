@@ -8,16 +8,17 @@ function EntryBuilder() {
 	this.publish_date="2009-12-29T00:29:41Z";
 	this.media_urls=[];
 	this.enclosures=[];
-	this.tags = ['tag1','tag2'];
+	this.tags = [];
+	this.states = [];
 
-	this.__noSuchMethod__ = function(attr, args) {
-		var attr_name = attr.replace(/^with_/, '');
-		var attr_name_pl = attr + 's';
+	this.__noSuchMethod__ = function(func_name, args) {
+		var attr_name = func_name.replace(/^with_/, '');
+		var attr_name_pl = attr_name + 's';
 		var val = args[0];
 		if(attr_name in this) {
 			this[attr_name] = val;
 		} else if(attr_name_pl in this) {
-			this[attr_name].push(val);
+			this[attr_name_pl].push(val);
 		} else {
 			throw "No such attribute: " + attr_name;
 		}
@@ -31,7 +32,7 @@ function EntryBuilder() {
 			xml += '<category term="user/00000000000000000000/label/'+this+'" scheme="http://www.google.com/reader/" label="[pod85] Links"/>';
 		});
 		jQuery.each(this.states, function() {
-			xml += '<category term="user/00000000000000000000/state/com.google/'+this+'" scheme="http://www.google.com/reader/" label="'+this+'"/>' +
+			xml += '<category term="user/00000000000000000000/state/com.google/'+this+'" scheme="http://www.google.com/reader/" label="'+this+'"/>';
 		});
 		xml += '<title type="html">'+this.title+'</title>' +
 			'	<published>'+this.publish_date+'</published>' +

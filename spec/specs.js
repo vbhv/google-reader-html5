@@ -1,4 +1,5 @@
 $(document).ready(function(){
+	Logging.setlevel('info');
 	var should=test;
 
 	function todo() {
@@ -57,46 +58,50 @@ $(document).ready(function(){
 
 	(function() {
 		module("entry construction");
-		function parse(entry_xml) {
-			return new Entry(entry_xml);
+		function parse(entry) {
+			return new Entry(entry.build());
 		}
 		function entry() {
 			return new EntryBuilder();
 		}
 
 		test("should extract media elements", function(){
-			same(parse("TODO").media,
+			return pending();
+			same(parse(entry().with_media_url('media1').with_media_url('media2')).media,
 				['media1','media2']);
 		});
 
 		test("should extract enclosure elements", function(){
-			same(parse("TODO").media,
-				['media1','media2']);
+			pending();
 		});
 
 		test("should extract singular values", function(){
-			todo();
+			pending();
 		});
 
 		test("should extract categories", function(){
-			todo();
+			pending();
 		});
 
 		test("should extract read, starred, shared states", function(){
-			todo();
+			pending();
 		});
 
 		test("should use 'summary' if body is not present", function(){
-			same(parse("TODO").media,
-				['media1','media2']);
+			pending();
 		});
 
 		test("should extract & construct date", function(){
-			todo();
+			pending();
 		});
 
 		test("should set a default state", function(){
-			todo();
+			same(parse(entry().with_states([]).with_tags([])).state, {
+				read:false,
+				publish: false,
+				starred: false,
+				tags: [],
+			})
 		});
 
 		test("should use the base href to set a base URL", function(){

@@ -1,8 +1,13 @@
 $(document).ready(function(){
+	var should=test;
 
 	function todo() {
 		equals("not yet complete", "done");
-	};
+	}
+
+	function pending() {
+		ok('pending');
+	}
 
 	(function() {
 		var processor;
@@ -52,16 +57,24 @@ $(document).ready(function(){
 
 	(function() {
 		module("entry construction");
+		function parse(entry_xml) {
+			return new Entry(entry_xml);
+		}
+		function entry() {
+			return new EntryBuilder();
+		}
 
 		test("should extract media elements", function(){
-			todo();
+			same(parse("TODO").media,
+				['media1','media2']);
 		});
 
 		test("should extract enclosure elements", function(){
-			todo();
+			same(parse("TODO").media,
+				['media1','media2']);
 		});
 
-		test("should singular values", function(){
+		test("should extract singular values", function(){
 			todo();
 		});
 
@@ -69,8 +82,13 @@ $(document).ready(function(){
 			todo();
 		});
 
-		test("should use 'summary' if body is not present", function(){
+		test("should extract read, starred, shared states", function(){
 			todo();
+		});
+
+		test("should use 'summary' if body is not present", function(){
+			same(parse("TODO").media,
+				['media1','media2']);
 		});
 
 		test("should extract & construct date", function(){
@@ -81,7 +99,11 @@ $(document).ready(function(){
 			todo();
 		});
 
-	});
+		test("should use the base href to set a base URL", function(){
+			pending();
+		});
+
+	})();
 
 });
 

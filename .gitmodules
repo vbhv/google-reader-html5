@@ -7,3 +7,6 @@
 [submodule "ext/js-bakery"]
 	path = ext/js-bakery
 	url = git://github.com/gfxmonk/js-bakery.git
+[submodule "ext/qunit"]
+	path = ext/qunit
+	url = git://github.com/runeh/qunit.git

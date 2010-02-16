@@ -3,7 +3,7 @@
 	url = git://github.com/gfxmonk/lawnchair
 [submodule "ext/async"]
 	path = ext/async
-	url = http://github.com/eligrey/async.js.git
+	url = http://github.com/gfxmonk/async.js.git
 [submodule "ext/js-bakery"]
 	path = ext/js-bakery
 	url = git://github.com/gfxmonk/js-bakery.git

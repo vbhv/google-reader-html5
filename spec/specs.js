@@ -7,6 +7,7 @@ $(document).ready(function(){
 	}
 
 	function pending() {
+		error("Pending test!");
 		ok('pending');
 	}
 
@@ -66,42 +67,65 @@ $(document).ready(function(){
 		}
 
 		test("should extract media elements", function(){
-			return pending();
 			same(parse(entry().with_media_url('media1').with_media_url('media2')).media,
 				['media1','media2']);
 		});
 
 		test("should extract enclosure elements", function(){
-			pending();
+			same(parse(entry().with_media_url('media1').with_enclosure('enclosure1')).media,
+				['media1','enclosure1']);
+
+			same(parse(entry().with_enclosure('enclosure1').with_enclosure('enclosure2')).media,
+				['enclosure1','enclosure2']);
 		});
 
 		test("should extract singular values", function(){
-			pending();
+			var parsed = parse(entry().
+				with_title('title').
+				with_link('http://example.com/post1').
+				with_google_id('g1234').
+				with_feed_name('the best feed').
+				with_content('body').
+				with_id('1234'));
+
+			same(parsed.title, 'title');
+			same(parsed.link, 'http://example.com/post1');
+			same(parsed.google_id, 'g1234');
+			same(parsed.id, '1234');
+			same(parsed.body, 'body');
+			same(parsed.feed_name, 'the best feed');
 		});
 
 		test("should extract categories", function(){
-			pending();
+			var tags = ['foo','bar'];
+			same(parse(entry().with_tags(tags)).state.tags, tags);
 		});
 
-		test("should extract read, starred, shared states", function(){
-			pending();
-		});
-
-		test("should use 'summary' if body is not present", function(){
-			pending();
+		test("should use 'summary' if content is not present", function(){
+			same(parse(entry().with_content(null).with_summary('summary')).body, 'summary');
 		});
 
 		test("should extract & construct date", function(){
-			pending();
+			// note: month is zero-indexed
+			var expected_timestamp = Date.UTC(2010, 1, 23, 0, 29, 41);
+			var timestamp = parse(entry().with_publish_date("2010-02-23T00:29:41Z")).timestamp;
+			same(new Date(timestamp), new Date(expected_timestamp));
 		});
 
 		test("should set a default state", function(){
-			same(parse(entry().with_states([]).with_tags([])).state, {
+			same(parse(entry().with_states(['reading-list']).with_tags([])).state, {
 				read:false,
 				publish: false,
-				starred: false,
+				star: false,
 				tags: [],
 			})
+		});
+
+		test("should extract read, starred, shared states", function(){
+			same(parse(entry().with_states([])).state.read, true);
+			same(parse(entry().with_state('reading-list')).state.read, false);
+			same(parse(entry().with_state('starred')).state.star, true);
+			same(parse(entry().with_state('broadcast')).state.publish, true);
 		});
 
 		test("should use the base href to set a base URL", function(){

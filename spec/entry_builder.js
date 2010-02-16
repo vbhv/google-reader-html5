@@ -1,7 +1,8 @@
 function EntryBuilder() {
 	this.title = "title";
 	this.id = "id";
-	this.body="body";
+	this.content="content";
+	this.summary = 'summary';
 	this.link="http://google.com";
 	this.google_id="google_id";
 	this.feed_name="feed name";
@@ -27,7 +28,7 @@ function EntryBuilder() {
 
 	this.build = function() {
 		var xml = '<entry gr:crawl-timestamp-msec="1262048383557">' + 
-			'	<id gr:original-id="'+this.google_id+'">tag:google.com,2006:reader/item/34a32a3877947efd</id>';
+			'	<id gr:original-id="'+this.id+'">tag:google.com,2006:reader/item/'+this.google_id+'</id>';
 		jQuery.each(this.tags, function() {
 			xml += '<category term="user/00000000000000000000/label/'+this+'" scheme="http://www.google.com/reader/" label="[pod85] Links"/>';
 		});

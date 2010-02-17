@@ -1,4 +1,15 @@
 Lawnchair = Lawnchair.BakeConstructor();
+var array_minus = function(a,b) {
+	// return a "minus" b, set-wise
+	var diff = [];
+	jQuery.each(a, function(idx, obj) {
+		if(jQuery.inArray(obj, b) === -1) {
+			diff.push(obj);
+		}
+	});
+	return diff;
+};
+
 
 Store = function(mode) {
 	var self = this;
@@ -24,6 +35,7 @@ Store = function(mode) {
 	self.items = self._table('items');
 	self.resources = self._table('res');
 	self.action_store = self._table('actions');
+	self.images = self._table('images');
 
 	self.isEmpty = function(cb) {
 		tags = yield self.tags.all();
@@ -218,6 +230,27 @@ Store = function(mode) {
 		var collapsed = yield self.collapse_actions();
 		collapsed = yield self._get_action_info();
 		cb(collapsed.values);
+	};
+
+	self.missing_images = function(cb) {
+		var all_used_images = yield self._all_used_images();
+		var all_saved_images = yield self._all_saved_images();
+		cb(array_minus(all_used_images, all_saved_images));
+	};
+
+	self.remove_unused_images = function(cb) {
+		var all_used_images = yield self._all_used_images();
+		var all_saved_images = yield self._all_saved_images();
+		var unused_images = array_minus(all_saved_images, all_used_images);
+		jQuery.each(unused_images, function() {
+			self.images.remove(this);
+		});
+	};
+
+	self._all_saved_images = function(cb) {
+		var all_saved_images = yield self.images.all();
+		all_saved_images = jQuery.map(all_saved_images, function(img) { return img.key; });
+		cb(all_saved_images);
 	};
 
 	self.tag = function(tag_name, cb) {

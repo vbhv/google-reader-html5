@@ -164,16 +164,15 @@ $(document).ready(function(){
 		var store;
 		var _lawnchair;
 		var lawnchairs;
-		module("store", {
+		module("store images", {
 			setup: function() {
 				_lawnchair = Lawnchair;
 				lawnchairs = {};
 				Lawnchair = function(opts) {
 					var name = opts.table;
-					console.info("Lawnchair created: " + name);
 					lawnchairs[name] = this;
-				}
-				store = new Store();
+				};
+				store = new Store('dom');
 			},
 
 			teardown: function() {

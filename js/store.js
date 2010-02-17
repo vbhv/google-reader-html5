@@ -1,4 +1,5 @@
 Lawnchair = Lawnchair.BakeConstructor();
+
 Store = function(mode) {
 	var self = this;
 

@@ -134,6 +134,148 @@ $(document).ready(function(){
 
 	})();
 
+
+	(function() {
+		var reader = {};
+		var store = {};
+		var processor = {};
+		var sync = new Sync(reader, store, processor);
+
+		module("image sync");
+
+		asyncTest("should download all missing images", function(){
+			var get_requests = [];
+			store.missing_images = function(cb) {
+				cb(['new1','new2']);
+			};
+			var old_get = GET;
+			GET = function(url, data, cb, err) {
+				get_requests.push([url,data]);
+			}
+			sync.mirror_images(function() {
+				GET = old_get;
+				same(get_requests, ['new1','new2']);
+				start();
+			});
+		});
+	})();
+
+	(function() {
+		var store;
+		var _lawnchair;
+		var lawnchairs;
+		module("store", {
+			setup: function() {
+				_lawnchair = Lawnchair;
+				lawnchairs = {};
+				Lawnchair = function(opts) {
+					var name = opts.table;
+					console.info("Lawnchair created: " + name);
+					lawnchairs[name] = this;
+				}
+				store = new Store();
+			},
+
+			teardown: function() {
+				Lawnchair = _lawnchair;
+			},
+		});
+
+		asyncTest("store should construct a list of all missing images", function() {
+			store._all_used_images = function(cb) {
+				cb(['a','b','c']);
+			}.bake();
+			
+			lawnchairs['images'].all = function(cb) {
+				cb([{key:'a'},{key:'d'},{key:'e'}]);
+			}.bake();
+
+			store.missing_images(function(images) {
+				same(images, ['b','c']);
+				start();
+			});
+		});
+
+		asyncTest("store should drop all unnecessary images", function() {
+			var removed = [];
+			lawnchairs['images'].remove = function(key) {
+				removed.push(key);
+			};
+
+			store._all_used_images = function(cb) {
+				cb(['a','b','c']);
+			}.bake();
+
+			lawnchairs['images'].all = function(cb) {
+				cb([{key:'a'},{key:'d'},{key:'e'}]);
+			}.bake();
+				
+			store.remove_unused_images(function() {
+				same(removed, ['d','e']);
+				start();
+			});
+		});
+
+		asyncTest("store should extract all used images from current items", function() {
+			var removed;
+			function ItemWithImage(images, read) {
+				this.images = images;
+				this.state = {read: read};
+			};
+
+			var unread_items = [
+				new ItemWithImage(['a1','b1'], false),
+				new ItemWithImage(['c1'], false),
+			];
+
+			var read_items = [
+				new ItemWithImage(['a2','b2'], true),
+				new ItemWithImage(['c2'], true),
+			];
+
+			lawnchairs['items'].all = function(cb) {
+				cb(unread_items.concat(read_items));
+			}.bake();
+
+			store._all_used_images = function(used) {
+				same(used, ['a1','b1','c1']);
+				start();
+			}.bake();
+		});
+
+		asyncTest("store should delete all read items", function() {
+			var removed = [];
+			function RemoveableItem(id, read) {
+				this.key = id;
+				this.remove = function() {
+					removed.push(id);
+				};
+				this.state = {read: read};
+			};
+
+			var unread_items = [
+				new RemoveableItem('unread1', false),
+				new RemoveableItem('unread2', false),
+				new RemoveableItem('unread2', false),
+			];
+			var read_items = [
+				new RemoveableItem('read1', true),
+				new RemoveableItem('read2', true),
+				new RemoveableItem('read2', true),
+			];
+
+			lawnchairs['items'].all = function(cb) {
+				cb(unread_items.concat(read_items));
+			}.bake();
+
+			store.delete_read_items(function() {
+				same(removed, ['read1','read2','read3']);
+				start();
+			});
+		});
+
+	})();
+
 });
 
 

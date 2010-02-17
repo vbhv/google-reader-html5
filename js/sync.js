@@ -24,7 +24,6 @@ var Sync = function(reader, store, processor) {
 		verbose("pushing");
 		var pending_actions = yield self.store.pending_actions();
 		yield map_cb(pending_actions, function(action, _cb) {
-			info("mappy!")
 			var name = action[0];
 			var key = action[1];
 			var value = action[2]; //optional, but javascript doesn't care

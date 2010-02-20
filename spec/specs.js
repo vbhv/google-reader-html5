@@ -67,16 +67,25 @@ $(document).ready(function(){
 		}
 
 		test("should extract media elements", function(){
-			same(parse(entry().with_media_url('media1').with_media_url('media2')).media,
-				['media1','media2']);
+			same(parse(entry().with_media_url('media1')).media,
+				['media1']);
 		});
 
 		test("should extract enclosure elements", function(){
-			same(parse(entry().with_media_url('media1').with_enclosure('enclosure1')).media,
-				['media1','enclosure1']);
+			same(parse(entry().with_enclosure('enclosure1')).media,
+				['enclosure1']);
+		});
 
-			same(parse(entry().with_enclosure('enclosure1').with_enclosure('enclosure2')).media,
-				['enclosure1','enclosure2']);
+		test("should extract both media and enclosure elements", function(){
+			same(
+				parse(
+					entry().
+						with_media_url('media1').
+						with_media_url('media2').
+						with_enclosure('enclosure1').
+						with_enclosure('enclosure2')
+				).media,
+				['media1', 'media2','enclosure1', 'enclosure2']);
 		});
 
 		test("should extract singular values", function(){

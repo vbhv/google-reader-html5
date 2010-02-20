@@ -268,18 +268,22 @@ function Entry(xml) {
 	this.link = this.doc.children('link').eq(0).attr('href');
 
 	// should be: (if not for jQuery parsing oddities)
-	// this.feed_name = this.doc.children('source').children('title').eq(0).text();
+	// this.feed_name = this.doc.children('source').find('title').eq(0).text();
 	var titles = this.doc.children('title');
 
 	this.feed_name = titles.eq(titles.length - 1).text();
 	this.timestamp = Entry.parse_date(this.doc.children('published').eq(0).text()).getTime();
 
-	var media_nodes = this.doc.children('media:content').attr('url');
-	this.media = media_nodes ? media_nodes.get() : [];
-	var enclosure_nodes = this.doc.children('link[rel=enclosure]').attr('href');
-	if(enclosure_nodes) {
-		this.media.concat(enclosure_nodes.get());
+	var attrs = function(collection, name) {
+		return jQuery.map(collection, function(elem) {
+			return jQuery(elem).attr(name);
+		});
 	}
+
+	this.media =
+		attrs(this.doc.find('media\\:content'), 'url').concat(
+		attrs(this.doc.children('link[rel=enclosure]'), 'href')
+	);
 
 	this.state = {
 		read: true,

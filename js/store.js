@@ -259,7 +259,6 @@ Store = function(mode) {
 			if(!this.state.read) {
 				if(this.images instanceof Array) {
 					images = images.concat(this.images);
-					info("images = " + images)
 				}
 			}
 		});

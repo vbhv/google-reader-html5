@@ -41,6 +41,20 @@ function EntryBuilder() {
 			'	<link rel="alternate" href="'+this.link+'" type="text/html"/>' +
 			'	<summary xml:base="'+this.base_href+'" type="html">'+this.summary+'</summary>';
 
+		if(this.media_urls) {
+			xml += '<media:group>';
+			jQuery.each(this.media_urls, function() {
+				xml += '<media:content url="' + this + '"/>';
+			});
+			xml += '</media:group>';
+		}
+
+		if(this.enclosures) {
+			jQuery.each(this.enclosures, function() {
+				xml += '<link rel="enclosure" href="' + this + '"/>';
+			});
+		}
+
 		if(this.content) {
 			xml += '<content type="html">'+this.content+'</content>';
 		}

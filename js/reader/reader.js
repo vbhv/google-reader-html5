@@ -1,4 +1,3 @@
-
 function GoogleReader() {
 	var self = this;
 	self.token = null;
@@ -264,6 +263,7 @@ function Entry(xml) {
 	if(!this.body) {
 		this.body = this.doc.children('summary').eq(0).text();
 	}
+	this.body = this.body.replace(/<script.*?<\/script>/, '');
 	this.title = this.doc.children('title').eq(0).text();
 	this.link = this.doc.children('link').eq(0).attr('href');
 

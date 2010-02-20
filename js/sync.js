@@ -105,13 +105,13 @@ var Sync = function(reader, store, processor) {
 	self.push = function(cb) {
 		self.locked(function(_cb){
 			self._push(_cb);
-		}, cb);
+		}.bake(self), cb);
 	};
 
 	self.run = function(cb) {
 		self.locked(function(_cb){
 			self._run(_cb);
-		}, cb);
+		}.bake(self), cb);
 	};
 
 	self.locked = function(func, cb) {

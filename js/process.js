@@ -10,7 +10,6 @@ var Processor = function(store) {
 		body = this.insert_media(entry, body);
 		entry.images = this.extract_image_urls(body);
 		entry.body = body.html();
-		return entry;
 	};
 
 	function _subtitle(img) {

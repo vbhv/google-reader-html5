@@ -2,7 +2,7 @@
 	<head>
 		<title>Google Reader HTML5 client</title>
 		<!-- low level -->
-		<script type="text/javascript" src="js/lib/jquery-1.3.2.min.js"></script>
+		<script type="text/javascript" src="js/lib/jquery-1.4.2.min.js"></script>
 		<script type="text/javascript" src="js/lib/json2.js"></script>
 		<script language="javascript" type="application/javascript;version=1.7" src="js/logging.js"></script>
 		<script language="javascript" src="js/async-bakery.js"></script>
@@ -24,6 +24,9 @@
 		<script type="text/javascript" src="js/reader/const.js"></script>
 		<script language="javascript" type="application/javascript;version=1.7" src="js/reader/reader.js"></script>
 
+		<!-- jquery.progressbar -->
+		<script type="text/javascript" src="js/jquery.progressbar/jquery.progressbar.min.js"></script>
+
 		<!-- app -->
 		<script language="javascript" type="application/javascript;version=1.7" src="js/views.js"></script>
 		<script language="javascript" type="application/javascript;version=1.7" src="js/ui.js"></script>
@@ -32,10 +35,12 @@
 		<script language="javascript" type="application/javascript;version=1.7" src="js/process.js"></script>
 		<script language="javascript" type="application/javascript;version=1.7" src="js/app.js"></script>
 		<script language="javascript" type="application/javascript;version=1.7" src="js/main.js"></script>
+		<script type="text/javascript" src="js/progress.js"></script>
 
 		<script language="javascript" type="application/javascript;version=1.7" src="private.js"></script> <!-- for setting a local dev user/pass -->
 
-		<link rel="stylesheet" type="text/css" href="index.css" />
+		<link rel="stylesheet" type="text/css" href="res/css/index.css" />
+		<link rel="stylesheet" type="text/css" href="res/css/progress.css" />
 	</head>
 	<body>
 		<div id="app">
@@ -43,6 +48,8 @@
 			<ul id="tags" class="ui"></ul>
 			<div id="feed" class="ui" style="display:none;"></div>
 			<div id="entry" style="display:none;"></div>
+			<div id="status"></div>
+			<div id="progress"></div>
 		</div>
 	</body>
 </html>

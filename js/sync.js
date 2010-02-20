@@ -14,7 +14,7 @@ var Sync = function(reader, store, processor) {
 	self.pull_items = function(tag_name, cb) {
 		var feed = yield self.reader.get_tag_feed(tag_name, null);
 		yield map_cb(feed.entries, function(entry, _cb) {
-			yield processor.run(entry);
+			processor.run(entry);
 			yield self.store.add_entry(tag_name, entry);
 			_cb();
 		});
@@ -24,6 +24,7 @@ var Sync = function(reader, store, processor) {
 	self._push = function(cb) {
 		verbose("pushing");
 		var pending_actions = yield self.store.pending_actions();
+		var progress = new ProgressBar(pending_actions.length, "pushing status");
 		yield map_cb(pending_actions, function(action, _cb) {
 			var name = action[0];
 			var key = action[1];
@@ -43,9 +44,12 @@ var Sync = function(reader, store, processor) {
 			} else {
 				error("failed pushing state: " + name);
 			}
+			progress.add(1);
 			_cb();
 		});
 		self.store.delete_read_items();
+		progress.remove();
+		verbose("push complete");
 		cb();
 	};
 
@@ -59,9 +63,15 @@ var Sync = function(reader, store, processor) {
 		info("SYNC: tags pulled!");
 		var active_tags = yield self.store.get_active_tags();
 		verbose("SYNC: there are " + active_tags.length + " active tags");
+		var progress = new ProgressBar(active_tags.length, "downloading tags");
 		yield map_cb(active_tags, function(tag, _cb) {
+			progress.add(1);
 			yield self.pull_items(tag.key);
 			_cb();
+		});
+		progress.remove()
+		window.setTimout(function() {
+			self.mirror_images(NULL_CB);
 		});
 		info("SYNC: all done");
 		cb();
@@ -69,10 +79,15 @@ var Sync = function(reader, store, processor) {
 
 	self.mirror_images = function(cb) {
 		var missing_images = yield self.store.missing_images();
-		var progress = 0;
-		var max_progress = missing_images.length;
+		var progress = new ProgressBar(missing_images.length, "downloading images");
+		var remaining = missing_images.length;
 		jQuery.each(missing_images, function(idx, url){
 			GET(url, null, function(data) {
+				progress.add(1);
+				missing_images -= 1;
+				if(missing_images <= 0) {
+					progress.remove();
+				}
 				self.store.save_image({
 					key: url,
 					data: data,
@@ -95,18 +110,16 @@ var Sync = function(reader, store, processor) {
 	};
 
 	self.locked = function(func, cb) {
-		return function() {
-			if(self.busy) {
-				info(this + " is busy");
-				return cb();
-			} else {
-				self.busy = true;
-				return func.call(this, function() {
-					self.busy = false;
-					cb.apply(this, arguments);
-				});
-			}
-		};
+		if(self.busy) {
+			info(this + " is busy");
+			return cb();
+		} else {
+			self.busy = true;
+			return func.call(this, function() {
+				self.busy = false;
+				cb.apply(this, arguments);
+			});
+		}
 	};
 
 

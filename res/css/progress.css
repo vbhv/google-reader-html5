@@ -1,0 +1,44 @@
+.progress.container {
+	width:200px;
+	padding: 5px;
+	background:black;
+	opacity:0.4;
+	font-size: 0.8em;
+	border-bottom:1px solid #333;
+}
+.progress.container:first-child {
+	-moz-border-radius-topleft: 10px;
+}
+.progress.container:last-child {
+	border: none;
+}
+
+.progress.bar {
+	opacity: 0.8;
+	-moz-opacity: 0.8;
+	padding-left:20px;
+	margin: 0 auto;
+	color: #bbb;
+	margin-top:3px;
+	font-size: 0.9em;
+	vertical-align:top;
+	padding-bottom:2px;
+}
+
+.progress.bar img {
+	position:relative;
+	top:2px;
+}
+
+.progress.message {
+	margin: 0 auto;
+	color:white;
+	text-align:center;
+}
+
+#progress {
+	position:absolute;
+	right:0;
+	bottom:0;
+}
+

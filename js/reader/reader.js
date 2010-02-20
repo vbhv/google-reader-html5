@@ -270,8 +270,9 @@ function Entry(xml) {
 	// should be: (if not for jQuery parsing oddities)
 	// this.feed_name = this.doc.children('source').find('title').eq(0).text();
 	var titles = this.doc.children('title');
-
 	this.feed_name = titles.eq(titles.length - 1).text();
+
+
 	this.timestamp = Entry.parse_date(this.doc.children('published').eq(0).text()).getTime();
 
 	var attrs = function(collection, name) {

@@ -12,7 +12,9 @@ var Sync = function(reader, store, processor) {
 	};
 
 	self.pull_items = function(tag_name, cb) {
+		verbose("grabbing tag feed: " + tag_name);
 		var feed = yield self.reader.get_tag_feed(tag_name, null);
+		verbose("processing entries...");
 		yield map_cb(feed.entries, function(entry, _cb) {
 			processor.run(entry);
 			yield self.store.add_entry(tag_name, entry);
@@ -47,7 +49,10 @@ var Sync = function(reader, store, processor) {
 			progress.add(1);
 			_cb();
 		});
-		self.store.delete_read_items();
+		verbose("removing read items");
+		yield self.store.delete_read_items();
+		verbose("removing unused images");
+		yield self.store.remove_unused_images();
 		progress.remove();
 		verbose("push complete");
 		cb();

@@ -126,7 +126,6 @@ function EntryListView(ui) {
 
 	this.render = function(e) {
 		var self=this;
-		debug("entry " + e.title + " is " + e.state.read ? 'read' : 'unread');
 		var text = e.title;
 		if(e.state.star) { text = "(*) " + text; }
 		return mkNode({

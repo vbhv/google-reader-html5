@@ -266,7 +266,12 @@ function Entry(xml) {
 	}
 	this.title = this.doc.children('title').eq(0).text();
 	this.link = this.doc.children('link').eq(0).attr('href');
-	this.feed_name = this.doc.children('source').children('title').eq(0).text();
+
+	// should be: (if not for jQuery parsing oddities)
+	// this.feed_name = this.doc.children('source').children('title').eq(0).text();
+	var titles = this.doc.children('title');
+
+	this.feed_name = titles.eq(titles.length - 1).text();
 	this.timestamp = Entry.parse_date(this.doc.children('published').eq(0).text()).getTime();
 
 	var media_nodes = this.doc.children('media:content').attr('url');

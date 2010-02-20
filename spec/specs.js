@@ -85,13 +85,11 @@ $(document).ready(function(){
 				with_link('http://example.com/post1').
 				with_google_id('g1234').
 				with_feed_name('the best feed').
-				with_content('body').
-				with_id('1234'));
+				with_content('body'));
 
 			same(parsed.title, 'title');
 			same(parsed.link, 'http://example.com/post1');
-			same(parsed.google_id, 'g1234');
-			same(parsed.id, '1234');
+			same(parsed.id, 'g1234');
 			same(parsed.body, 'body');
 			same(parsed.feed_name, 'the best feed');
 		});
@@ -145,16 +143,31 @@ $(document).ready(function(){
 
 		asyncTest("should download all missing images", function(){
 			var get_requests = [];
+			var saved_images = [];
+
 			store.missing_images = function(cb) {
 				cb(['new1','new2']);
+			}.bake();
+
+			store.save_image = function(obj, cb) {
+				saved_images.push(obj);
+				cb();
 			};
+
 			var old_get = GET;
 			GET = function(url, data, cb, err) {
-				get_requests.push([url,data]);
+				get_requests.push([url]);
+				cb("data for: " + url);
 			}
+
 			sync.mirror_images(function() {
 				GET = old_get;
-				same(get_requests, ['new1','new2']);
+				same(get_requests.length, 2);
+				same(saved_images, [
+					{key: 'new1', data: 'data for: new1' },
+					{key: 'new2', data: 'data for: new2' },
+				]);
+
 				start();
 			});
 		});
@@ -164,7 +177,7 @@ $(document).ready(function(){
 		var store;
 		var _lawnchair;
 		var lawnchairs;
-		module("store images", {
+		module("store", {
 			setup: function() {
 				_lawnchair = Lawnchair;
 				lawnchairs = {};
@@ -216,7 +229,6 @@ $(document).ready(function(){
 		});
 
 		asyncTest("store should extract all used images from current items", function() {
-			var removed;
 			function ItemWithImage(images, read) {
 				this.images = images;
 				this.state = {read: read};
@@ -224,6 +236,7 @@ $(document).ready(function(){
 
 			var unread_items = [
 				new ItemWithImage(['a1','b1'], false),
+				new ItemWithImage(undefined, false),
 				new ItemWithImage(['c1'], false),
 			];
 
@@ -236,31 +249,32 @@ $(document).ready(function(){
 				cb(unread_items.concat(read_items));
 			}.bake();
 
-			store._all_used_images = function(used) {
+			store._all_used_images(function(used) {
 				same(used, ['a1','b1','c1']);
 				start();
-			}.bake();
+			});
 		});
 
 		asyncTest("store should delete all read items", function() {
 			var removed = [];
 			function RemoveableItem(id, read) {
 				this.key = id;
-				this.remove = function() {
-					removed.push(id);
-				};
 				this.state = {read: read};
+			};
+
+			lawnchairs['items'].remove = function(key) {
+				removed.push(key);
 			};
 
 			var unread_items = [
 				new RemoveableItem('unread1', false),
 				new RemoveableItem('unread2', false),
-				new RemoveableItem('unread2', false),
+				new RemoveableItem('unread3', false),
 			];
 			var read_items = [
 				new RemoveableItem('read1', true),
 				new RemoveableItem('read2', true),
-				new RemoveableItem('read2', true),
+				new RemoveableItem('read3', true),
 			];
 
 			lawnchairs['items'].all = function(cb) {

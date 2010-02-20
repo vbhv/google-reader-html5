@@ -266,8 +266,7 @@ function Entry(xml) {
 	}
 	this.title = this.doc.children('title').eq(0).text();
 	this.link = this.doc.children('link').eq(0).attr('href');
-	this.google_id = this.doc.children('id').eq(0).text();
-	this.feed_name = this.doc.children('title').eq(0).text();
+	this.feed_name = this.doc.children('source').children('title').eq(0).text();
 	this.timestamp = Entry.parse_date(this.doc.children('published').eq(0).text()).getTime();
 
 	var media_nodes = this.doc.children('media:content').attr('url');

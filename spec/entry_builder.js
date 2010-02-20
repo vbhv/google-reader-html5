@@ -28,7 +28,7 @@ function EntryBuilder() {
 
 	this.build = function() {
 		var xml = '<entry gr:crawl-timestamp-msec="1262048383557">' + 
-			'	<id gr:original-id="'+this.id+'">tag:google.com,2006:reader/item/'+this.google_id+'</id>';
+			'	<id gr:original-id="'+this.id+'">'+this.google_id+'</id>';
 		jQuery.each(this.tags, function() {
 			xml += '<category term="user/00000000000000000000/label/'+this+'" scheme="http://www.google.com/reader/" label="[pod85] Links"/>';
 		});
@@ -52,7 +52,7 @@ function EntryBuilder() {
 			'	<gr:likingUser>4321</gr:likingUser>' +
 			'	<source gr:stream-id="feed/http://example.com/feed/id">' +
 			'		<id>tag:google.com,2005:reader/feed/http://example.com/feed/id</id>' +
-			'		<title type="html">feed title</title>' +
+			'		<title type="html">'+this.feed_name+'</title>' +
 			'		<link rel="alternate" href="'+this.link+'" type="text/html"/>' +
 			'	</source>' +
 			'</entry>';

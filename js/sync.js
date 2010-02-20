@@ -3,6 +3,7 @@ var Sync = function(reader, store, processor) {
 	self.reader = reader;
 	self.store = store;
 	self.processor = processor;
+	self.busy = false;
 
 	self.pull_tags = function(cb) {
 		var tags = yield self.reader.get_user_tags();
@@ -20,7 +21,7 @@ var Sync = function(reader, store, processor) {
 		cb();
 	};
 
-	self.push = function(cb) {
+	self._push = function(cb) {
 		verbose("pushing");
 		var pending_actions = yield self.store.pending_actions();
 		yield map_cb(pending_actions, function(action, _cb) {
@@ -44,12 +45,13 @@ var Sync = function(reader, store, processor) {
 			}
 			_cb();
 		});
+		self.store.delete_read_items();
 		cb();
 	};
 
-	self.run = function(cb) {
+	self._run = function(cb) {
 		info("SYNC: run()");
-		yield self.push();
+		yield self._push();
 		info("SYNC: state pushed!");
 		self.store.clear();
 		info("SYNC: cleared!");
@@ -64,4 +66,48 @@ var Sync = function(reader, store, processor) {
 		info("SYNC: all done");
 		cb();
 	};
+
+	self.mirror_images = function(cb) {
+		var missing_images = yield self.store.missing_images();
+		var progress = 0;
+		var max_progress = missing_images.length;
+		jQuery.each(missing_images, function(idx, url){
+			GET(url, null, function(data) {
+				self.store.save_image({
+					key: url,
+					data: data,
+				}, NULL_CB);
+			});
+		});
+		cb();
+	};
+
+	self.push = function(cb) {
+		self.locked(function(_cb){
+			self._push(_cb);
+		}, cb);
+	};
+
+	self.run = function(cb) {
+		self.locked(function(_cb){
+			self._run(_cb);
+		}, cb);
+	};
+
+	self.locked = function(func, cb) {
+		return function() {
+			if(self.busy) {
+				info(this + " is busy");
+				return cb();
+			} else {
+				self.busy = true;
+				return func.call(this, function() {
+					self.busy = false;
+					cb.apply(this, arguments);
+				});
+			}
+		};
+	};
+
+
 }.BakeConstructor();

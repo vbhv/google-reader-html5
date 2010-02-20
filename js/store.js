@@ -232,6 +232,10 @@ Store = function(mode) {
 		cb(collapsed.values);
 	};
 
+	self.save_image = function(img, cb) {
+		self.images.save(img, cb);
+	};
+
 	self.missing_images = function(cb) {
 		var all_used_images = yield self._all_used_images();
 		var all_saved_images = yield self._all_saved_images();
@@ -245,6 +249,31 @@ Store = function(mode) {
 		jQuery.each(unused_images, function() {
 			self.images.remove(this);
 		});
+		cb();
+	};
+
+	self._all_used_images = function(cb) {
+		var all_items = yield self.items.all();
+		var images = [];
+		jQuery.each(all_items, function() {
+			if(!this.state.read) {
+				if(this.images instanceof Array) {
+					images = images.concat(this.images);
+					info("images = " + images)
+				}
+			}
+		});
+		cb(images);
+	};
+
+	self.delete_read_items = function(cb) {
+		var items = yield self.items.all();
+		jQuery.each(items, function() {
+			if(this.state.read) {
+				self.items.remove(this.key);
+			}
+		});
+		cb();
 	};
 
 	self._all_saved_images = function(cb) {

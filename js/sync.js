@@ -67,6 +67,11 @@ var Sync = function(reader, store, processor) {
 		yield self.pull_tags();
 		info("SYNC: tags pulled!");
 		var active_tags = yield self.store.get_active_tags();
+		if(TAG_FILTER) {
+			active_tags = active_tags.filter(function(tag) {
+				return TAG_FILTER.indexOf(tag.key) != -1;
+			});
+		}
 		verbose("SYNC: there are " + active_tags.length + " active tags");
 		var progress = new ProgressBar(active_tags.length, "downloading tags");
 		yield map_cb(active_tags, function(tag, _cb) {

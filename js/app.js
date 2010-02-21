@@ -1,4 +1,5 @@
 var LOGIN_DETAILS = {};
+var TAG_FILTER=[];
 
 App = function(reader, store, sync, ui, processor) {
 	this.reader = reader;

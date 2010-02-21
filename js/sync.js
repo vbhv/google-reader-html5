@@ -77,20 +77,23 @@ var Sync = function(reader, store, processor) {
 		yield map_cb(active_tags, function(tag, _cb) {
 			progress.add(1);
 			yield self.pull_items(tag.key);
+			debug("tag " + tag.key + " downloaded");
 			_cb();
 		});
 		progress.remove()
-		window.setTimout(function() {
+		debug("setting up a callback to mirror images...");
+		window.setTimeout(function() {
 			self.mirror_images(NULL_CB);
-		});
+		},100);
 		info("SYNC: all done");
 		cb();
 	};
 
 	self.mirror_images = function(cb) {
 		var missing_images = yield self.store.missing_images();
-		var progress = new ProgressBar(missing_images.length, "downloading images");
 		var remaining = missing_images.length;
+		if(remaining == 0) { cb(); return; }
+		var progress = new ProgressBar(remaining, "downloading images");
 		jQuery.each(missing_images, function(idx, url){
 			GET(url, null, function(data) {
 				progress.add(1);

@@ -1,0 +1,41 @@
+#entry a, #entry .content a{ color:#acF !important; }
+/** entry display **/
+.post-info {
+	background:#111;
+	border: 0px solid #666;
+	color:#777;
+	padding:10px;
+}
+
+.post-info.header {
+	border-bottom-width: 1px;
+	margin-bottom: 10px;
+}
+
+.post-info > * {
+	text-align:center;
+}
+
+.post-info div {
+	font-size:0.7em;
+	line-height:1.1em;
+}
+.post-info.footer { border-top-width: 1px; margin-top:20px; }
+
+.post-info b, .post-info em{
+	font-style:normal;
+	font-weight:normal;
+	color:#ddd;
+}
+
+.content {
+	margin-bottom:20px;
+	padding:0 10px;
+	min-height:100%;
+}
+
+.content p {
+	margin-top:10px;
+	margin-bottom:10px;
+}
+

@@ -1,0 +1,57 @@
+.ui {
+	color: black !important;
+}
+
+.ui li {
+	border-top:1px solid #eee;
+	border-bottom: 1px solid #777;
+	background-color: #ddd;
+	font-size:1.2em;
+	width: auto;
+	padding: 0.2em;
+}
+
+.toolbar {
+	width:100%;
+	font-size:1.2em;
+	background: #333;
+	border-top: none;
+	border-bottom: 1px solid #fff;
+	color: #555;
+	background:#eee;
+	border-bottom:10px solid #ddd;
+	margin:0;
+	margin-top:-8px;
+	text-align:center;
+}
+
+.toolbar-wrapper {
+	border-bottom:2px solid red;
+	position:relative;
+	top:10px;
+}
+
+.toolbar a {
+	margin: 2px 0;
+	position:relative;
+	top:9px;
+	padding: 0 20px;
+	border: 1px solid transparent;
+}
+
+.toolbar a:hover {
+	background:#f4f4f4;
+	cursor:pointer;
+	color:#000;
+	border:1px solid #bbb;
+	border-top:none;
+	border-bottom:none;
+}
+
+.placeholder {
+	font-size:1.25em;
+	color:#888;
+	text-align:center;
+	padding:10% 30%;
+}
+

@@ -86,16 +86,19 @@ UI = function(store){
 	};
 
 	self.get_entry_offset = function(current, offset) {
-		var item_keys = self.active_feed.entries;
+		var all_items = self.active_feed.entry_objects;
+		var item_keys = jQuery.map(all_items, function(i) {
+			return i.key;
+		});
 		var index = jQuery.inArray(current.key, item_keys);
 		if(index == -1) {
 			return null;
 		}
 		var new_index = index + offset;
-		if(new_index < 0 || new_index >= item_keys.length) {
+		if(new_index < 0 || new_index >= all_items.length) {
 			return null;
 		}
-		return self.active_feed.entry_objects[new_index];
+		return all_items[new_index];
 	};
 
 	self.toggle = function(entry, flag, cb) {

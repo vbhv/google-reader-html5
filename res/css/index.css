@@ -38,14 +38,6 @@ pre {
 }
 
 
-.entry-summary.read {
-	color: #999;
-}
-.entry-summary .date{
-	color: #aaa;
-	float:right;
-}
-
 .num_items {
 	float:right;
 	color:#977;

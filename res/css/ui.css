@@ -1,15 +1,29 @@
 .ui {
-	color: black !important;
+	color: #fff;
 }
 
 .ui li {
-	border-top:1px solid #eee;
-	border-bottom: 1px solid #777;
-	background-color: #ddd;
+	border-top:1px solid #777;
+	background-color: #555;
 	font-size:1.2em;
 	width: auto;
 	padding: 0.2em;
 }
+.ui li:first-child {
+	border-top-color:#000;
+}
+.ui li:last-child {
+	border-bottom:1px solid #000;
+}
+.entry-summary.read {
+	color: #999;
+}
+.entry-summary .date{
+	color: #999;
+	float:right;
+	font-size:0.8em;
+}
+
 
 .toolbar {
 	width:100%;

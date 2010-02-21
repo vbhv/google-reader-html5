@@ -8,6 +8,7 @@ function POST(url, data, cb, err) {
 _USE_PROXY_ = true;
 _USE_FAKE_ = false;
 function _ajax(method, url, data, cb, err) {
+	data = data || {};
 	if ('Passwd' in data && (data.Passwd == '' || data.Passwd == 'FAKE')) {
 		// if we're logging in with dummy details..
 		_USE_FAKE_ = true;

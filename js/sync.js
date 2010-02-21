@@ -67,7 +67,8 @@ var Sync = function(reader, store, processor) {
 		yield self.pull_tags();
 		info("SYNC: tags pulled!");
 		var active_tags = yield self.store.get_active_tags();
-		if(TAG_FILTER) {
+		if(TAG_FILTER && TAG_FILTER.length > 0) {
+			info("filtering tags to just " + JSON.stringify(TAG_FILTER));
 			active_tags = active_tags.filter(function(tag) {
 				return TAG_FILTER.indexOf(tag.key) != -1;
 			});
@@ -91,23 +92,26 @@ var Sync = function(reader, store, processor) {
 
 	self.mirror_images = function(cb) {
 		var missing_images = yield self.store.missing_images();
-		var remaining = missing_images.length;
-		if(remaining == 0) { cb(); return; }
-		var progress = new ProgressBar(remaining, "downloading images");
-		jQuery.each(missing_images, function(idx, url){
+		if(missing_images.length == 0) { cb(); return; }
+		var progress = new ProgressBar(missing_images.length, "downloading images");
+		var get_next_image = function() {
+			if(missing_images.length == 0) {
+				progress.remove();
+				cb();
+			}
+			var url = missing_images.shift();
+			progress.add(1);
+
+			debug("downloading image: " + url);
 			GET(url, null, function(data) {
-				progress.add(1);
-				missing_images -= 1;
-				if(missing_images <= 0) {
-					progress.remove();
-				}
+				debug("download image: " + url);
 				self.store.save_image({
 					key: url,
 					data: data,
-				}, NULL_CB);
-			});
-		});
-		cb();
+				}, get_next_image);
+			}, get_next_image);
+		};
+		get_next_image();
 	};
 
 	self.push = function(cb) {

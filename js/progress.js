@@ -15,6 +15,8 @@ ProgressBar = function(max, description, scope) {
 	var bar = root.children('.bar');
 	var msg = root.children('.message');
 	var current = 0;
+	var complete = false;
+	var shown = false;
 
 	self.prog = function() { bar.progressBar.apply(bar, arguments); };
 	var opts ={
@@ -24,7 +26,7 @@ ProgressBar = function(max, description, scope) {
 	self.prog(opts);
 
 	self.show = function() {
-		root.show();
+		root.hide().slideToggle('fast', function(){shown = true;});
 		return self;
 	};
 
@@ -44,7 +46,13 @@ ProgressBar = function(max, description, scope) {
 	};
 
 	self.remove = function() {
-		root.slideToggle('fast', function() { root.remove(); });
+		complete = true;
+		if(shown) {
+			root.slideToggle('fast', function() { root.remove(); });
+		} else {
+			root.remove();
+		}
+		shown = false;
 	};
 
 	self.add = function(difference) {
@@ -56,7 +64,13 @@ ProgressBar = function(max, description, scope) {
 	if(description) {
 		self.message(description);
 	}
-	root.hide().slideToggle('fast');
+
+	self.hide();
+	window.setTimeout(function() {
+		if(!complete) {
+			self.show();
+		}
+	}, 100);
 
 };
 jQuery.progressBar.defaults.boxImage = "res/jquery.progressbar/progressbar.gif";

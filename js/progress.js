@@ -44,7 +44,6 @@ ProgressBar = function(max, description, scope) {
 	};
 
 	self.remove = function() {
-		verbose("removing " + description)
 		root.slideToggle('fast', function() { root.remove(); });
 	};
 

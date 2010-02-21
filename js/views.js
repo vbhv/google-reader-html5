@@ -178,6 +178,16 @@ function TagListView(ui, tagView) {
 
 	this.render = function(e) {
 		var children = jQuery.map(e, this.tagView.render);
+		if(children.length == 0) {
+			children = [mkNode({
+				type:'div', class: 'placeholder', children:[
+					{type:'span', text:'No tags available.'},
+					{type:'br'},
+					{type:'br'},
+					{type:'span', text:'You probably need to sync in order to get the latest updates.'},
+				]
+			})];
+		}
 		return mkNode({
 			type:'div',
 			children: [

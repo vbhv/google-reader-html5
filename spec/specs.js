@@ -54,6 +54,14 @@ $(document).ready(function(){
 			}).body,  '<p>text!</p><ul class="enclosure"><li><img src="image1.JPEG"></li><li><img src="image2.jpg"></li></ul>');
 		});
 
+		test("should only insert enclosure-based images that do not already appear", function(){
+			var body = '<p><img src="image1.JPEG"></p>';
+			equals(process({
+				body: body,
+				media: ['image1.JPEG'],
+			}).body, body);
+		});
+
 	})();
 
 

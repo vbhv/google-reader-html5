@@ -2,22 +2,14 @@ var Processor = function(store) {
 	var self = this;
 	self.store = store;
 
-	var image_matcher = /(jpe?g|gif|png|tiff)(\?.*)?$/i;
+	var image_matcher = /(jpe?g|gif|png|tiff)$/i;
 
 	function __imghack_ruin(s) {
-		return s.replace(/ src=/, ' _src=');
+		return s.replace(/ src=/g, ' _src=');
 	}
 
 	function __imghack_restore(s) {
-		return s.replace(/ _src=/, ' src=');
-	}
-
-	function __imghack_ruin_url(u) {
-		return '?' + u;
-	}
-	function __imghack_restore_url(u) {
-		if(!u) { return null; }
-		return u.replace(/^\?/,'');
+		return s.replace(/ _src=/g, ' src=');
 	}
 
 	this.run = function(entry) {
@@ -45,7 +37,7 @@ var Processor = function(store) {
 	};
 
 	function _img(src) {
-		return mkNode({type: 'img', src: __imghack_ruin_url(src)});
+		return mkNode({type: 'img', _src: src});
 	}
 	
 	this.add_alt_text = function(content) {
@@ -60,15 +52,16 @@ var Processor = function(store) {
 
 	this.insert_media = function(entry, body) {
 		var existing_images = jQuery.map(jQuery('img', body), function(img) {
-			return __imghack_restore_url(jQuery(img).attr('src'));
+			return _strip_request(jQuery(img).attr('_src'));
 		});
 		var images = jQuery.map(entry.media, function(elem) {
+			elem = _strip_request(elem);
 			var match = image_matcher.exec(elem);
 			if(match != null) {
 				if(existing_images.indexOf(elem) > -1) {
 					return null;
 				}
-				return mkNode({type:'li', children: [_img(_strip_request(elem))]});
+				return mkNode({type:'li', children: [_img(elem)]});
 			}
 			return null;
 		});
@@ -84,8 +77,8 @@ var Processor = function(store) {
 			top_level_images = top_level_images.concat(jQuery(this).find('img').get());
 		});
 		return jQuery.map(top_level_images, function(img) {
-			var url = jQuery(img).attr('src');
-			return url ? _strip_request(__imghack_restore(url)) : null;
+			var url = jQuery(img).attr('_src');
+			return url ? _strip_request(url) : null;
 		});
 	};
 

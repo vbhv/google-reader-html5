@@ -18,12 +18,11 @@
 .entry-summary.read {
 	color: #999;
 }
-.entry-summary .date{
+.entry-summary .date, .num_items{
 	color: #999;
 	float:right;
 	font-size:0.8em;
 }
-
 
 .toolbar {
 	width:100%;

@@ -13,10 +13,15 @@ var Processor = function(store) {
 	}
 
 	this.run = function(entry) {
+		verbose("processing entry: " + entry.key);
 		var body = jQuery('<div/>').append(__imghack_ruin(entry.body));
+		debug("adding alt text");
 		body = this.add_alt_text(body);
+		debug("inserting media images");
 		body = this.insert_media(entry, body);
+		debug("extracting image URLs");
 		entry.images = this.extract_image_urls(body);
+		debug("procssing complete");
 		entry.body = __imghack_restore(body.html());
 		return entry;
 	};

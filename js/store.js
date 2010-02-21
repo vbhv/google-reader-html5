@@ -100,6 +100,9 @@ Store = function(mode) {
 			jQuery.each(item.state.tags, function() {
 				var tag = this;
 				tag_counts[tag] += 1;
+				if(!(tag in tag_counts)) {
+					error("unknown tag: " + tag);
+				}
 			});
 		});
 
@@ -118,7 +121,7 @@ Store = function(mode) {
 			_cb(entry);
 		});
 		entries = entries.filter(filter);
-		tag.entries = entries;
+		tag.entry_objects = entries;
 		cb(tag);
 	};
 

@@ -37,6 +37,7 @@
 	top:9px;
 	padding: 0 20px;
 	border: 1px solid transparent;
+	color: #555 !important;
 }
 
 .toolbar a:hover {

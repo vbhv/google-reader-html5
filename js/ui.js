@@ -40,7 +40,7 @@ UI = function(store){
 	self.load_tag = function(tag_name, cb){
 		var feed = yield self.store.tag_with_entries(tag_name, self.entry_filter);
 		self.active_feed = feed;
-		feed.entries = feed.entries.sort_by('date');
+		feed.entry_objects = feed.entry_objects.sort_by('date');
 		self.render_feed(true, cb);
 	};
 
@@ -86,19 +86,16 @@ UI = function(store){
 	};
 
 	self.get_entry_offset = function(current, offset) {
-		var all_items = self.active_feed.entries;
-		var item_keys = jQuery.map(all_items, function(i) {
-			return i.key;
-		});
+		var item_keys = self.active_feed.entries;
 		var index = jQuery.inArray(current.key, item_keys);
 		if(index == -1) {
 			return null;
 		}
 		var new_index = index + offset;
-		if(new_index < 0 || new_index >= all_items.length) {
+		if(new_index < 0 || new_index >= item_keys.length) {
 			return null;
 		}
-		return all_items[new_index];
+		return self.active_feed.entry_objects[new_index];
 	};
 
 	self.toggle = function(entry, flag, cb) {

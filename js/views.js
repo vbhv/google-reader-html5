@@ -147,7 +147,7 @@ function FeedView(ui, entryView) {
 		var self = this;
 		verbose("rendering feed: " + e.key);
 
-		var result = jQuery.map(e.entries, function(entry) {
+		var result = jQuery.map(e.entry_objects, function(entry) {
 			return entryView.render(entry);
 		});
 		return mkNode({type: 'div',

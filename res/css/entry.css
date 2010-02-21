@@ -1,4 +1,4 @@
-#entry a, #entry .content a{ color:#acF !important; }
+#entry .header a, #entry .content a{ color:#acF !important; }
 /** entry display **/
 .post-info {
 	background:#111;

@@ -15,6 +15,11 @@
 .ui li:last-child {
 	border-bottom:1px solid #000;
 }
+
+.ui li a {
+	cursor:pointer;
+}
+
 .entry-summary.read {
 	color: #999;
 }
@@ -24,15 +29,29 @@
 	font-size:0.8em;
 }
 
+#toolbar {
+	height:1.3em;
+	margin-bottom:6px;
+}
+.toolbar-shadow {
+	height:1.3em;
+	border-bottom:7px solid black;
+	opacity:0.6;
+	position:fixed;
+	width:100%;
+}
+
 .toolbar {
 	width:100%;
+	position:fixed;
+	height:1.3em;
+	top:0;
+	left:0;
 	font-size:1.2em;
-	background: #333;
-	border-top: none;
-	border-bottom: 1px solid #fff;
 	color: #555;
 	background:#eee;
 	border-bottom:10px solid #ddd;
+	border-top: none;
 	margin:0;
 	margin-top:-8px;
 	text-align:center;
@@ -47,7 +66,7 @@
 .toolbar a {
 	margin: 2px 0;
 	position:relative;
-	top:9px;
+	top:10px;
 	padding: 0 20px;
 	border: 1px solid transparent;
 	color: #555 !important;

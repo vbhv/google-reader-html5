@@ -1,4 +1,4 @@
-var migrate = function(store) {
+var migrate = function(store, cb) {
 	var MIGRATE_KEY = 1;
 	var CURRENT_VERSION = 0;
 	var self = this;
@@ -18,4 +18,5 @@ var migrate = function(store) {
 		}
 	}
 	yield store.version.save({key:MIGRATE_KEY, value:CURRENT_VERSION});
+	cb();
 }.bake();

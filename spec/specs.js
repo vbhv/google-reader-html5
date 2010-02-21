@@ -174,15 +174,21 @@ $(document).ready(function(){
 			var old_get = GET;
 			GET = function(url, data, cb, err) {
 				get_requests.push([url]);
-				cb("data for: " + url);
+				cb("data for: " + url, '200',
+					{
+						getResponseHeader: function(header) {
+						same(header, 'Content-type');
+						return 'image/type'
+					}
+				});
 			}
 
 			sync.mirror_images(function() {
 				GET = old_get;
 				same(get_requests.length, 2);
 				same(saved_images, [
-					{key: 'new1', data: 'data for: new1' },
-					{key: 'new2', data: 'data for: new2' },
+					{key: 'new1', data: 'data:image/type;base64,' + Base64.encode('data for: new1')},
+					{key: 'new2', data: 'data:image/type;base64,' + Base64.encode('data for: new2')},
 				]);
 
 				start();

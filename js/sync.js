@@ -92,19 +92,24 @@ var Sync = function(reader, store, processor) {
 
 	self.mirror_images = function(cb) {
 		var missing_images = yield self.store.missing_images();
+		verbose("downloading " + missing_images.length + " missing images")
 		if(missing_images.length == 0) { cb(); return; }
 		var progress = new ProgressBar(missing_images.length, "downloading images");
 		var get_next_image = function() {
 			if(missing_images.length == 0) {
 				progress.remove();
 				cb();
+				return;
 			}
 			var url = missing_images.shift();
 			progress.add(1);
 
 			debug("downloading image: " + url);
-			GET(url, null, function(data) {
-				debug("download image: " + url);
+			GET(url, null, function(data, responseCode, xhr) {
+				var mime_type = xhr.getResponseHeader('Content-type');
+				debug("download image: " + url + " (" + mime_type + ")");
+				data = 'data:' + mime_type + ';base64,' + Base64.encode(data);
+				_last_data = data;
 				self.store.save_image({
 					key: url,
 					data: data,

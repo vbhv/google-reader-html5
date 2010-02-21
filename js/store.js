@@ -16,11 +16,13 @@ Store = function(mode) {
 
 	var entry_converter = {
 		on_save: function(e) {
+			delete e.body_local;
 			delete e.date;
 		},
 
 		on_load: function(e) {
 			e.date = new Date(e.timestamp);
+			e.body_local = e.body;
 		}
 	};
 
@@ -118,6 +120,7 @@ Store = function(mode) {
 		var entries = yield map_cb(tag.entries, function(entry, _cb) {
 			entry = yield self.items.get(entry);
 			entry_converter.on_load(entry);
+			yield self.replace_with_stored_images(entry);
 			_cb(entry);
 		});
 		entries = entries.filter(filter);
@@ -266,6 +269,23 @@ Store = function(mode) {
 			}
 		});
 		cb(images);
+	};
+
+	self.replace_with_stored_images = function(entry, cb) {
+		var body = entry.body;
+		var all_saved_images = yield self.images.all();
+
+		// lets just assume that all URLs we downloaded are being used for image tags...
+		info("replacing images in " + entry.key + " (" + all_saved_images.length + " images downloaded)");
+		jQuery.each(all_saved_images, function(idx, image) {
+			var url = image.key;
+			if(body.indexOf(url) != -1) {
+				debug("replacing image URL " + url + " with data: " + image.data);
+				body.replace(url, image.data, 'gi');
+			}
+		});
+		entry.body_local = body;
+		cb();
 	};
 
 	self.delete_read_items = function(cb) {

@@ -35,9 +35,9 @@ Store = function(mode) {
 	self.tags = self._table('tags');
 	self.feeds = self._table('feeds');
 	self.items = self._table('items');
-	self.resources = self._table('res');
 	self.action_store = self._table('actions');
 	self.images = self._table('images');
+	self.version = self._table('version');
 
 	self.isEmpty = function(cb) {
 		tags = yield self.tags.all();
@@ -49,7 +49,7 @@ Store = function(mode) {
 			self.tags,
 			self.feeds,
 			self.items,
-			self.resources,
+			self.images,
 		], function() { this.nuke(); });
 	};
 	

@@ -11,6 +11,7 @@ App = function(reader, store, sync, ui, processor) {
 	var self=this;
 
 	self.main = function(cb) {
+		yield migrate(self.store);
 		if (yield self.store.isEmpty()) {
 			info("starting a sync");
 			yield self.do_sync(true);

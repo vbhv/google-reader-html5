@@ -1,6 +1,6 @@
 Logging = new function() {
 	var _null = function() {};
-	var _console = typeof('console') != 'undefined' ? console : {
+	var _console = typeof(console) != 'undefined' ? console : {
 		log: _null,
 		debug: _null,
 		info: _null,

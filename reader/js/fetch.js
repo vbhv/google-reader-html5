@@ -17,7 +17,7 @@ function _ajax(method, url, data, cb, err) {
 	if (_USE_PROXY_) {
 		data['url'] = url;
 		data['method'] = method;
-		url = 'proxy.py';
+		url = '../proxy.py';
 		method = 'POST';
 		if (_USE_FAKE_) {
 			data['FAKE'] = 1;

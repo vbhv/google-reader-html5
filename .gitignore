@@ -1,2 +1,4 @@
-fake_cache.py
+*fake_cache*.py
 private*
+index.yaml
+*.pyc

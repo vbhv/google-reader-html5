@@ -1,38 +1,52 @@
 #!/usr/bin/env python
 
-import cgi
-import cgitb
-import urllib2
 import urllib
-import cookielib
-cgitb.enable()
+def main():
+	import cgi
+	import cgitb
+	cgitb.enable()
 
-params = cgi.FieldStorage()
+	params = cgi.FieldStorage()
 
-params = dict((p.name, p.value) for p in params.list)
+	params = dict((p.name, p.value) for p in params.list)
+	print handle(params)
 
-url = params.pop('url')
-method = params.pop('method') if 'method' in params else 'GET'
-param_str = urllib.urlencode(params)
 
-if 'FAKE' in params:
-	import fake_cache
-	print fake_cache.respond(url, params)
-	import sys
-	sys.exit(0)
+def handle(params, appengine=False):
+	url = params.pop('url')
+	method = params.pop('method') if 'method' in params else 'GET'
+	param_str = urllib.urlencode(params)
 
-args = (url, param_str)
-if method == 'GET':
-	args = (("%s?%s" % args),)
+	if 'FAKE' in params:
+		import fake_cache
+		return fake_cache.respond(url, params)
 
-if 'SID' in params:
-	cookie = cookielib.Cookie(version=0, name='SID', value=params.pop('SID'), port=None, port_specified=False, domain='.google.com', domain_specified=True, domain_initial_dot=True, path='/', path_specified=True, secure=False, expires='1600000000', discard=False, comment=None, comment_url=None, rest={})
-	handler = urllib2.HTTPCookieProcessor()
-	handler.cookiejar.set_cookie(cookie)
-	urllib2.install_opener(urllib2.build_opener(handler))
+	if method == 'GET':
+		url = "%s?%s" % (url, param_str)
+		urlargs = (url,)
+	else:
+		urlargs = (url, param_str)
 
-stream = urllib2.urlopen(*args)
-content_type = stream.info().type
-print "Content-Type: %s" % (content_type,)
-print
-print stream.read()
+	if not appengine:
+		import urllib2
+		if 'SID' in params:
+			import cookielib
+			cookie = cookielib.Cookie(version=0, name='SID', value=params.pop('SID'), port=None, port_specified=False, domain='.google.com', domain_specified=True, domain_initial_dot=True, path='/', path_specified=True, secure=False, expires='1600000000', discard=False, comment=None, comment_url=None, rest={})
+			handler = urllib2.HTTPCookieProcessor()
+			handler.cookiejar.set_cookie(cookie)
+			urllib2.install_opener(urllib2.build_opener(handler))
+
+		stream = urllib2.urlopen(*urlargs)
+		content_type = stream.info().type
+		return "Content-Type: %s" % (content_type,) + "\n\n" + stream.read()
+	else:
+		from google.appengine.api.urlfetch import fetch
+		headers = {}
+		if 'SID' in params:
+			headers['Cookie'] = 'SID=%s' % (params.pop('SID'),)
+		response = fetch(*urlargs, method=method, headers=headers, follow_redirects=False, deadline=10)
+		return response
+
+if __name__ == '__main__':
+	main()
+

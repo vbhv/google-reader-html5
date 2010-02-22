@@ -1,12 +1,12 @@
-[submodule "ext/lawnchair"]
-	path = ext/lawnchair
+[submodule "reader/ext/lawnchair"]
+	path = reader/ext/lawnchair
 	url = git://github.com/gfxmonk/lawnchair
-[submodule "ext/async"]
-	path = ext/async
+[submodule "reader/ext/async"]
+	path = reader/ext/async
 	url = http://github.com/gfxmonk/async.js.git
-[submodule "ext/js-bakery"]
-	path = ext/js-bakery
+[submodule "reader/ext/js-bakery"]
+	path = reader/ext/js-bakery
 	url = git://github.com/gfxmonk/js-bakery.git
-[submodule "ext/qunit"]
-	path = ext/qunit
+[submodule "reader/ext/qunit"]
+	path = reader/ext/qunit
 	url = git://github.com/runeh/qunit.git

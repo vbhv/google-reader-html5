@@ -44,7 +44,7 @@ def handle(params, appengine=False):
 		headers = {}
 		if 'SID' in params:
 			headers['Cookie'] = 'SID=%s' % (params.pop('SID'),)
-		response = fetch(*urlargs, method=method, headers=headers, follow_redirects=False, deadline=10)
+		response = fetch(*urlargs, **dict(method=method, headers=headers, follow_redirects=False, deadline=10))
 		return response
 
 if __name__ == '__main__':

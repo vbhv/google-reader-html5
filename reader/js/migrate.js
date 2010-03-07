@@ -6,6 +6,7 @@ var migrate = function(store, cb) {
 	var migrations = {
 	};
 
+	alert(store)
 	var last_version = yield store.version.get(MIGRATE_KEY);
 	last_version = last_version ? last_version.value : 0;
 	debug("current database version: " + last_version);

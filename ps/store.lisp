@@ -18,8 +18,10 @@
 	(setf (@ this action-store) (_table "action-store"))
 	(setf (@ this images)       (_table "images"))
 	(setf (@ this version)      (_table "version"))
+	(return this)
 )
-(setf *store (@ *store *bake-constructor))
+(setf *store (chain *store (*bake-constructor)))
+
 
 (add-meth_ *store set-valid-tags (tag-names)
 	(defer current-tags (chain this tags (all)))
@@ -27,11 +29,12 @@
 		(if (not (in_array (@ current-tag id) tag-names))
 			(chain this tags (remove current-tag)))
 	)
-	(defer nil (map_ tag-names (lambda (tag-name)
+	(defer nil (map_ tag-names (lambda_ (tag-name)
 		(defer tag (chain this tags (get tag-name)))
 		(if (== tag nil)
 			(defer nil (chain this tags (save (create key tag-name entries [])))))
 		(debug (+ "added feed:" tag-name))
+		(ret)
 	)))
 	(ret)
 )
@@ -50,7 +53,6 @@
 	(dolist (store datastores) (chain store (nuke))))
 
 
-
 (add-meth_ *store get-all-tags () (ret_ (chain this tags (all))))
 (add-meth_ *store get-active-tags () (ret_ (chain this tags (all))))
 
@@ -60,7 +62,7 @@
 
 	(var tag-counts {})
 	(dolist (tag tags)
-		(setf (getprop tag-counts (@ tag key)) 0))
+		(setf (@ tag-counts (@ tag key)) 0))
 
 	(dolist (item all-items)
 		(dolist (tag (@ item state tags))
@@ -70,7 +72,7 @@
 	))
 
 	(var tags-with-counts (jQuery_map tags (lambda (tag)
-		(return (create tag tag count (getprop tag-counts (@ tag key)))))))
+		(return (create tag tag count (@ tag-counts (@ tag key)))))))
 	
 	(ret tags-with-counts))
 
@@ -152,7 +154,7 @@
 			(if (=== false opposite-index)
 				(chain unique-actions (push action))
 				(progn
-					(verbose (+ "dropping action " action " (" i ") && " (getprop actions (+ i opposite-index))
+					(verbose (+ "dropping action " action " (" i ") && " (@ actions (+ i opposite-index))
 											"( " (+ opposite-index i) ")"))
 					(chain blacklist (push (+ opposite-index i))))))))
 		))))

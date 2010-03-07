@@ -82,4 +82,6 @@
 (js:defmacro+ps add-meth_ (cls meth lambda-list &rest body)
 	`(setf (ps:chain ,cls prototype ,meth) (lambda_ ,lambda-list (ps:var self this) ,@body)))
 
+(js:defmacro+ps bake-constructor (cls)
+	`(setf ,cls (js:chain ,cls (*bake-constructor))))
 

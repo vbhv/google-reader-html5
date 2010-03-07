@@ -1,3 +1,5 @@
+(js:defmacro+ps _ (&rest body) `(ps:chain ,@body))
+
 (defmacro println (&rest fmt-args)
 	(setf (car fmt-args) (concatenate 'string (car fmt-args) "~%"))
 	`(format t ,@fmt-args))

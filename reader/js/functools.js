@@ -19,37 +19,6 @@ function in_array(needle, haystack) {
 	return false;
 }
 
-Function.prototype.result_raw = function() {
-	var self = this;
-	var args = arguments;
-	return [self, args];
-}
-
-Function.prototype.result = function() {
-	var self=this;
-	var wrapper = function(func_args, cb) {
-		func_args = Array.prototype.slice.call(func_args);
-		func_args = func_args.slice();
-		func_args.push(cb);
-		// debug("result for " + self + " being called with " + func_args);
-		async(self).apply(this, func_args);
-	}
-	return [wrapper, arguments];
-}
-Function.prototype._ = Function.prototype.result;
-
-
-var map_cb = (function(collection, func, cb) {
-	results = [];
-	for(var i=0; i<collection.length; i++) {
-		results.push(yield func.result(collection[i]));
-	}
-	if(!(cb instanceof Function)) {
-		error("while mapping " + JSON.stringify(collection) + "\n\nwith " + JSON.stringify(func) + " , cb = " + JSON.stringify(cb));
-	}
-	cb(results);
-}).bake();
-
 Array.prototype.collapse = function() {
 	var result = [];
 	for(var i=0; i<this.length; i++) {

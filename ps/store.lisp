@@ -1,0 +1,37 @@
+(add-meth_ *store set-valid-tags (tag-names)
+	(defer current-tags (self tags (all)))
+	(dolist (current-tag current-tags)
+		(if (! (in_array (@ current-tag id) tag-names))
+			(self tags (remove current-tag)))
+	)
+	(defer nil (map tag-names (lambda (tag-name)
+		(defer tag (self tags (get tag-name)))
+		(if (== tag nil)
+			(defer nil (self tags (save (create key tag-name entries [])))))
+		(debug (+ "added feed:" tag-name))
+	)))
+	(ret)
+)
+
+(add-meth_ *store get-all-tags () (ret_ (chain self tags (all))))
+(add-meth_ *store get-all-tags () (ret_ (chain self tags (all))))
+
+(add-meth_ *store get-tag-counts (tags filter)
+	(defer all-items (self items (all)))
+	(setf all-items (chain all-items (filter filter)))
+
+	(var tag-counts {})
+	(dolist (tag tags)
+		(setf (getprop tag-counts (@ tag key)) 0))
+
+	(dolist (item all-items)
+		(dolist (tag (@ item state tags))
+			(incf (getprop tag-counts tag))
+			(if (! (in tag tag-counts))
+				(error (+ "unknown tag: " tag)))
+	))
+
+	(var tags-with-counts (map tags (lambda (tag)
+		(return (create tag tag count (getprop tag-counts (@ tag key)))))))
+	
+	(ret tags-with-counts))

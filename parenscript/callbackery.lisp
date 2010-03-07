@@ -16,7 +16,7 @@
 				(let*
 					(
 						(arg (second stmt))
-						(expr (third stmt))
+						(expr (append `(ps:chain) (third stmt)))
 						(result (wrap-return arg (convert expr) (convert *js-continuation*))))
 					(setf *js-continuation* nil) ; the continuation has been dealt with now!
 					result))
@@ -34,6 +34,19 @@
 				(cons this-statement (convert *js-continuation*))))
 	))
 
+(defun append-callback (expr cb)
+	(if (eq (first expr) 'ps:chain)
+		(progn
+			; (println "changing last elem to: ~a" (append (last-elem expr) `((lambda ,arglist ,@body-proc))))
+			(setf (nth (- (length expr) 1) expr)
+				(append (last-elem expr) (list cb)))
+		)
+		(progn
+			; (println "~a != ~a" (first expr) 'chain)
+			(setf expr (append expr (list cb))))
+		)
+	expr)
+
 (defun wrap-return (arg expr body-proc)
 	"turn an assignment into an expression with bundled callback
 	(which executes body-proc)"
@@ -46,18 +59,7 @@
 		; (println "expr == ~a" expr)
 		; (println "car expr == ~a" (car expr))
 		; (println "last expr == ~a" (last-elem expr))
-		(if (eq (first expr) 'ps:chain)
-			(progn
-				; (println "changing last elem to: ~a" (append (last-elem expr) `((lambda ,arglist ,@body-proc))))
-				(setf (nth (- (length expr) 1) expr)
-					(append (last-elem expr) `((lambda ,arglist ,@body-proc))))
-			)
-			(progn
-				; (println "~a != ~a" (first expr) 'chain)
-				(setf expr (append expr `((lambda ,arglist ,@body-proc)))))
-			)
-		; (println "expr changed to: ~a" expr)
-		expr))
+		(append-callback expr `(lambda ,arglist ,@body-proc))))
 
 (js:defmacro+ps defun_ (name lambda-list &rest proc)
 	`(defun ,name ,(append lambda-list `(cb)) ,@(convert proc)))
@@ -72,6 +74,14 @@
 
 (js:defmacro+ps ret_ (expr)
 	`(progn
-		,(append expr `(cb))
+		,(append-callback expr 'cb)
 		(return)))
 
+(js:defmacro+ps add-meth (cls meth lambda-list &rest body)
+	`(setf (ps:chain ,cls prototype ,meth) (lambda ,lambda-list ,@body)))
+
+(js:defmacro+ps add-meth_ (cls meth lambda-list &rest body)
+	`(setf (ps:chain ,cls prototype ,meth) (lambda_ ,lambda-list ,@body)))
+
+(js:defmacro map (iterable func)
+	(js:chain jQuery (map iterable (func))))

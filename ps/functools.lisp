@@ -7,3 +7,4 @@
 	(defer result (func (chain iterable pop 0)))
 	(chain current (push result))
 	(ret (map-accum current iterable func)))
+

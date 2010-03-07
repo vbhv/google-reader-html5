@@ -1,11 +1,17 @@
+COMPILED_JS="reader/psjs"
+SRC_JS="ps"
+
 parenscript:
-	for f in ps/*; do \
+	for f in $(SRC_JS)/*; do \
 		base=`basename "$$f" .lisp`; \
-		echo "making reader/psjs/$$base.js"; \
-		make reader/psjs/"$$base.js"; \
+		echo "making $(COMPILED_JS)/$$base.js"; \
+		make $(COMPILED_JS)/"$$base.js"; \
 	done
 
 reader/psjs/%.js: ps/%.lisp
 	./compile-js "$<" "$@"
 
-.PHONY: parenscript
+clean:
+	rm -f $(COMPILED_JS)/*.js
+
+.PHONY: parenscript clean

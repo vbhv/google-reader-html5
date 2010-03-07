@@ -1,0 +1,27 @@
+#!/usr/bin/env clisp
+(load "~/.clisprc.lisp")
+(asdf:operate 'asdf:load-op :parenscript)
+(load "parenscript/callbackery.lisp")
+
+; eww!
+(handler-bind
+	((error #'(lambda (c) (invoke-restart :parenscript))))
+	(use-package :parenscript))
+
+(defun compile-js (input output)
+	(let* (
+			(input (car *args*))
+			(output (cadr *args*))
+			(result (with-open-file (f input) (ps:ps-compile-stream f))))
+		(with-open-file (f output :direction :output :if-exists :supersede)
+			(format f "~a" result))))
+
+(unless
+	(eq 2 (length *args*))
+	(format t "args: ~a" *args*)
+	(error "Usage: compile-js input.lisp output.js"))
+
+;(use-package :parenscript)
+(format t "compiling...")
+(compile-js (first *args*) (second *args*))
+

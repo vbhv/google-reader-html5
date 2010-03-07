@@ -3,10 +3,11 @@
 (asdf:operate 'asdf:load-op :parenscript)
 (load "parenscript/callbackery.lisp")
 
-; eww!
+;; eww!
 (handler-bind
 	((error #'(lambda (c) (invoke-restart :parenscript))))
 	(use-package :parenscript))
+; (shadowing-import 'ps:*)
 
 (defun compile-js (input output)
 	(let* (

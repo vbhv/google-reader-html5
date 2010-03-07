@@ -1,4 +1,3 @@
-(defmacro sl (&rest args) `(chain ,@args))
 (defmacro println (&rest fmt-args)
 	(setf (car fmt-args) (concatenate 'string (car fmt-args) "~%"))
 	`(format t ,@fmt-args))
@@ -16,7 +15,7 @@
 				(let*
 					(
 						(arg (second stmt))
-						(expr (append `(ps:chain) (third stmt)))
+						(expr (third stmt))
 						(result (wrap-return arg (convert expr) (convert *js-continuation*))))
 					(setf *js-continuation* nil) ; the continuation has been dealt with now!
 					result))
@@ -78,10 +77,9 @@
 		(return)))
 
 (js:defmacro+ps add-meth (cls meth lambda-list &rest body)
-	`(setf (ps:chain ,cls prototype ,meth) (lambda ,lambda-list ,@body)))
+	`(setf (ps:chain ,cls prototype ,meth) (lambda ,lambda-list (ps:var self this) ,@body)))
 
 (js:defmacro+ps add-meth_ (cls meth lambda-list &rest body)
-	`(setf (ps:chain ,cls prototype ,meth) (lambda_ ,lambda-list ,@body)))
+	`(setf (ps:chain ,cls prototype ,meth) (lambda_ ,lambda-list (ps:var self this) ,@body)))
 
-(js:defmacro map (iterable func)
-	(js:chain jQuery (map iterable (func))))
+

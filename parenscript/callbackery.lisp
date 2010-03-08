@@ -36,7 +36,7 @@
 	))
 
 (defun append-callback (expr cb)
-	(if (eq (first expr) 'ps:chain)
+	(if (or (eq (first expr) 'ps:chain) (eq (first expr) '_))
 		(progn
 			; (println "changing last elem to: ~a" (append (last-elem expr) `((lambda ,arglist ,@body-proc))))
 			(setf (nth (- (length expr) 1) expr)
@@ -87,3 +87,8 @@
 (js:defmacro+ps bake-constructor (cls)
 	`(setf ,cls (js:chain ,cls (*bake-constructor))))
 
+(js:defmacro+ps defcls (name lambda-list &rest body)
+	`(setf ,name (ps:chain
+			(lambda ,lambda-list
+				,@(append `((ps:var self this)) body `((return this))))
+		(*bake-constructor))))

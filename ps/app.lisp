@@ -1,26 +1,25 @@
 (var *login-details {})
 (var *tag-filter [])
 
-(defun *app (reader store sync ui processor)
-	(setf (@ this reader) reader)
-	(setf (@ this store) store)
-	(setf (@ this ui) ui)
-	(setf (@ this sync) sync)
-	(setf (@ this processor) processor)
-	(setf (@ this logged-in) false)
-	(return this))
-(setf *app (chain *app (*bake-constructor)))
+(defcls *app (reader store sync ui processor)
+	(setf (@ self reader) reader)
+	(setf (@ self store) store)
+	(setf (@ self ui) ui)
+	(setf (@ self sync) sync)
+	(setf (@ self processor) processor)
+	(setf (@ self logged-in) false)
+	)
 
 (add-meth_ *app main ()
-	(defer nil (migrate (@ this store)))
-	(defer is-empty (chain this store (is-empty)))
+	(defer nil (migrate (@ self store)))
+	(defer is-empty (chain self store (is-empty)))
 	(if is-empty
 		(progn
 			(info "starting a sync")
 			(ret (chain self (do-sync t)))))
 	(verbose "no sync needed")
 	(var success false)
-	(chain self ui refresh (lambda () (setf success t) (ret)))
+	(chain self ui (refresh (lambda () (setf success t) (ret))))
 	(chain window
 		(set-timeout
 			(lambda ()
@@ -37,7 +36,7 @@
 	(if do-download
 		(setf action (@ self sync run))
 		(setf action (@ self sync push)))
-	(defer nil (action))
+	(defer nil (_ action (call self)))
 	(debug "now for a refresh")
 	(ret_ (chain self ui (refresh))))
 
@@ -59,5 +58,6 @@
 		(if (@ self ui entry-filter) nil (@ *entry is-unread)))
 	(defer nil (chain self ui (render-tags false)))
 	(defer nil (chain self ui (render-feed false))))
+
 
 

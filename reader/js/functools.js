@@ -40,7 +40,7 @@ Array.prototype.filter = function(f) {
 	return result;
 }
 
-Array.prototype.sort_by = function(key_func) {
+Array.prototype.sortBy = function(key_func) {
 	if(!(key_func instanceof Function)) {
 		var key = key_func;
 		key_func = function(obj) {

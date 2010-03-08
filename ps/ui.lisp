@@ -1,4 +1,4 @@
-(defun *ui (store)
+(defcls *ui (store)
 	(setf (@ self store) store)
 	(setf (@ self tags-dom) (j-query "#tags"))
 	(setf (@ self feed-dom) (j-query "#feed"))
@@ -7,14 +7,12 @@
 	(setf (@ self active-entry) nil)
 	(setf (@ self entry-filter) (@ *entry is-unread))
 	(setf (@ self views) (create
-		:entry (new (*entry-view this))
-		:feed  (new (*feed-view this (new (*entry-view this))))
-		:taglist (new (*tag-list-view this (new (*tag-view this))))))
+		:entry (new (*entry-view self))
+		:feed  (new (*feed-view self (new (*entry-view self))))
+		:taglist (new (*tag-list-view self (new (*tag-view self))))))
 
 	(setf (@ self dom-areas) (list (@ self tags-dom) (@ self feed-dom) (@ self entry-dom)))
-
-	(return self))
-(bake-constructor *ui)
+	)
 
 (add-meth *ui render (name obj)
 	(return (chain (getprop (@ self views) name) (render obj))))
@@ -25,7 +23,7 @@
 	(setf tags (chain tags (sort-by "key")))
 	(debug (+ "UI: got " (@ tags length) " tags after reload"))
 	(setf (@ self tags) tags)
-	(ret_ (chain self (render-tags false))))
+	(ret_ (_ self (render-tags false))))
 
 (add-meth_ *ui refresh ()
 	(info "UI: refresh")
@@ -38,6 +36,13 @@
 	(setf (@ self active-feed) feed)
 	(setf (@ feed entry-objects) (chain feed entry-objects (sort-by "date")))
 	(ret_ (chain self (render-feed t))))
+
+(add-meth_ *ui render-tags (force-display)
+	(defer tags-with-counts (_ self store (get-tag-counts (@ self tags) (@ self entry-filter))))
+	(var rendered (_ self (render "taglist" tags-with-counts)))
+	(_ self tags-dom (empty) (append rendered))
+	(if force-display (_ self (show-tags)))
+	(ret))
 
 (add-meth_ *ui render-feed (force-display)
 	(defer tags-with-counts (chain self store (get-tag-counts (@ self tags) (@ self entry-filter))))
@@ -97,9 +102,9 @@
 	(chain self (render-entry (@ self active-entry))))
 
 (add-meth *ui show (dom)
-	(dolist (area (@ this dom-areas))
+	(dolist (area (@ self dom-areas))
 		(if (== dom area)
-			(chain this (show))
-			(chain this (hide)))))
+			(chain self (show))
+			(chain self (hide)))))
 
 

@@ -57,7 +57,10 @@ function mkNode(props) {
 
 var funcd = function(func) {
 	var args = Array.prototype.slice.call(arguments, 1);
-	args.push(function(){});
+	args.push(NULL_CB);
+	if(! func) {
+		error("bad func!");
+	}
 	return function() {
 		func.apply(null, args);
 	};
@@ -77,11 +80,11 @@ function EntryView(ui) {
 					type:'div',
 					class: 'toolbar',
 					children: [
-						{type: 'a', text: '<<', onclick: funcd(self.ui.show_prev, e) },
-						{type: 'a', text: '>>', onclick: funcd(self.ui.show_next, e) },
-						{type: 'a', text: '^up', onclick: funcd(self.ui.render_feed, true)},
-						{type: 'a', text: (e.state.read ? 'keep' : 'mark read'), onclick: funcd(self.ui.toggle_read, e) },
-						{type: 'a', text: (e.state.star ? '-' : '+') + ' star', onclick: funcd(self.ui.toggle_star, e) },
+						{type: 'a', text: '<<', onclick: funcd(self.ui.showPrev, e) },
+						{type: 'a', text: '>>', onclick: funcd(self.ui.showNext, e) },
+						{type: 'a', text: '^up', onclick: funcd(self.ui.renderFeed, true)},
+						{type: 'a', text: (e.state.read ? 'keep' : 'mark read'), onclick: funcd(self.ui.toggleRead, e) },
+						{type: 'a', text: (e.state.star ? '-' : '+') + ' star', onclick: funcd(self.ui.toggleStar, e) },
 					]
 				},
 				{type:'div', class:'post-info header', children: [
@@ -131,7 +134,7 @@ function EntryListView(ui) {
 		return mkNode({
 			type: 'li',
 			class:"entry-summary " + (e.state.read ? "read" : "unread"),
-			onclick: funcd(self.ui.render_entry, e),
+			onclick: funcd(self.ui.renderEntry, e),
 			children: [
 				{type: 'a', text:text},
 				{type: 'span', class:'date', text:relative_date(e.date)},
@@ -147,7 +150,7 @@ function FeedView(ui, entryView) {
 		var self = this;
 		verbose("rendering feed: " + e.key);
 
-		var result = jQuery.map(e.entry_objects, function(entry) {
+		var result = jQuery.map(e.entryObjects, function(entry) {
 			return entryView.render(entry);
 		});
 		return mkNode({type: 'div',
@@ -157,7 +160,7 @@ function FeedView(ui, entryView) {
 						type: 'div',
 						class: 'toolbar',
 						children: [
-							{type: 'a', onclick: funcd(self.ui.render_tags, true), text: '<back'},
+							{type: 'a', onclick: funcd(self.ui.renderTags, true), text: '<back'},
 							_show_read_button(self),
 						]
 					},
@@ -169,7 +172,7 @@ function FeedView(ui, entryView) {
 };
 
 function _show_read_button(self) {
-	return { type: 'a', text: (self.ui.entry_filter ? 'show' : 'hide') + ' read', onclick: funcd(app.toggle_show_read, false), }
+	return { type: 'a', text: (self.ui.entryFilter ? 'show' : 'hide') + ' read', onclick: funcd(app.toggleShowRead, false), }
 }
 
 function TagListView(ui, tagView) {
@@ -195,9 +198,9 @@ function TagListView(ui, tagView) {
 					type:'div',
 					class: 'toolbar',
 					children: [
-						{ type: 'a', text: 'sync', onclick: funcd(app.do_sync, true), },
-						{ type: 'a', text: 'push', onclick: funcd(app.do_sync, false), },
-						{ type: 'a', text: 'clear', onclick: funcd(app.clear_and_sync, false), },
+						{ type: 'a', text: 'sync', onclick: funcd(app.doSync, true), },
+						{ type: 'a', text: 'push', onclick: funcd(app.doSync, false), },
+						{ type: 'a', text: 'clear', onclick: funcd(app.clearAndSync, false), },
 						_show_read_button(this),
 					],
 				},
@@ -215,8 +218,8 @@ function TagView(ui) {
 	this.ui = ui;
 	this.render = function(e) {
 		var tag = e.tag;
-		var num_items = e.count;
-		if(num_items == 0) {
+		var numItems = e.count;
+		if(numItems == 0) {
 			return null;
 		}
 		var name = tag.key;
@@ -224,9 +227,9 @@ function TagView(ui) {
 			type:'li',
 			class: "tag ",
 			children: [
-				{ type: 'a', onclick: funcd(ui.load_tag, name), children: [
+				{ type: 'a', onclick: funcd(ui.loadTag, name), children: [
 					{ type: 'span', text: name },
-					{ type: 'span', class: 'num_items', text: num_items }
+					{ type: 'span', class: 'num_items', text: numItems }
 				]}
 			],
 		});

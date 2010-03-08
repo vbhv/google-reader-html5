@@ -1,5 +1,5 @@
-(defun *store (mode)
-	(setf (@ this entry-converter)
+(defcls *store (mode)
+	(setf (@ self entry-converter)
 		(create
 			on-save (lambda (e)
 				(delete (@ e body-local))
@@ -12,27 +12,24 @@
 	(defun _table (name filters)
 		(return (new (*lawnchair (create table name adaptor mode)))))
 
-	(setf (@ this tags)         (_table "tags"))
-	(setf (@ this feeds)        (_table "feeds"))
-	(setf (@ this items)        (_table "items"))
-	(setf (@ this action-store) (_table "action-store"))
-	(setf (@ this images)       (_table "images"))
-	(setf (@ this version)      (_table "version"))
-	(return this)
+	(setf (@ self tags)         (_table "tags"))
+	(setf (@ self feeds)        (_table "feeds"))
+	(setf (@ self items)        (_table "items"))
+	(setf (@ self action-store) (_table "action-store"))
+	(setf (@ self images)       (_table "images"))
+	(setf (@ self version)      (_table "version"))
 )
-(setf *store (chain *store (*bake-constructor)))
-
 
 (add-meth_ *store set-valid-tags (tag-names)
-	(defer current-tags (chain this tags (all)))
+	(defer current-tags (chain self tags (all)))
 	(dolist (current-tag current-tags)
 		(if (not (in_array (@ current-tag id) tag-names))
-			(chain this tags (remove current-tag)))
+			(chain self tags (remove current-tag)))
 	)
 	(defer nil (map_ tag-names (lambda_ (tag-name)
-		(defer tag (chain this tags (get tag-name)))
+		(defer tag (chain self tags (get tag-name)))
 		(if (== tag nil)
-			(defer nil (chain this tags (save (create key tag-name entries [])))))
+			(defer nil (chain self tags (save (create key tag-name entries [])))))
 		(debug (+ "added feed:" tag-name))
 		(ret)
 	)))
@@ -40,24 +37,24 @@
 )
 
 (add-meth_ *store is-empty ()
-	(chain defer tags (chain self tags (all)))
+	(defer tags (chain self tags (all)))
 	(ret (== 0 (@ tags length))))
 
 (add-meth *store clear ()
 	(var datastores
 		(list
-			(@ this tags)
-			(@ this feeds)
-			(@ this items)
-			(@ this images)))
+			(@ self tags)
+			(@ self feeds)
+			(@ self items)
+			(@ self images)))
 	(dolist (store datastores) (chain store (nuke))))
 
 
-(add-meth_ *store get-all-tags () (ret_ (chain this tags (all))))
-(add-meth_ *store get-active-tags () (ret_ (chain this tags (all))))
+(add-meth_ *store get-all-tags () (ret_ (chain self tags (all))))
+(add-meth_ *store get-active-tags () (ret_ (chain self tags (all))))
 
 (add-meth_ *store get-tag-counts (tags filter)
-	(defer all-items (chain this items (all)))
+	(defer all-items (chain self items (all)))
 	(setf all-items (chain all-items (filter filter)))
 
 	(var tag-counts {})
@@ -71,24 +68,24 @@
 				(error (+ "unknown tag: " tag)))
 	))
 
-	(var tags-with-counts (jQuery_map tags (lambda (tag)
-		(return (create tag tag count (@ tag-counts (@ tag key)))))))
+	(var tags-with-counts (_ j-query (map tags (lambda (tag)
+		(return (create tag tag count (@ tag-counts (@ tag key))))))))
 	
 	(ret tags-with-counts))
 
 (add-meth_ *store tag-with-entries (tag-name filter)
-	(defer tag (chain this (tag tag-name)))
+	(defer tag (chain self (tag tag-name)))
 	(defer entries (map (@ tag entries) (lambda_ (entry)
-		(defer entry (chain this items (get entry)))
-		(chain this entry-converter (on-load entry))
-		(ret_ (chain this (replace-with-stored-images entry)))
+		(defer entry (chain self items (get entry)))
+		(chain self entry-converter (on-load entry))
+		(ret_ (chain self (replace-with-stored-images entry)))
 	)))
 	(setf entries (chain entries (filter filter)))
 	(setf (@ tag entry-objects) entries)
 	(ret tag))
 
 (add-meth_ *store add-entry (tag-name entry)
-	(defer tag (chain this (tag tag-name)))
+	(defer tag (chain self (tag tag-name)))
 	(if (== tag nil)
 		(progn
 			(warn (+ "no such tag: " (chain JSON (stringify tag-name))))
@@ -97,31 +94,31 @@
 		(progn
 			(chain tag entries (push (@ entry id)))
 			(setf (@ entry key) (@ entry id))
-			(chain this entry-converter (on-save entry))
+			(chain self entry-converter (on-save entry))
 			(verbose
 				(+ "added item " (@ entry id) " to tag " (@ tag key) " and now it has " (@ tag entries length)))
-			(ret_ (chain this tags (save tag))))
+			(ret_ (chain self tags (save tag))))
 		(ret)
 ))
 
 (add-meth_ *store toggle-flag (entry flag)
 	(info (+ "toggling flag: " flag " on entry " entry))
 	(var val (not (or (@ entry (getprop state flag)) false)))
-	(defer nil (chain this (set-flag entry val)))
+	(defer nil (chain self (set-flag entry val)))
 	(ret val))
 
 (add-meth_ *store set-flag (entry flag val)
 	(info (+ "setting flag: " flag " to " val " on entry " entry))
 	(setf (@ entry (getprop state flag)) val)
-	(chain this entry-converter (on-save) entry)
-	(defer nil (chain this items (save entry)))
-	(defer nil (chain this (add-action flag (@ entry id) val)))
+	(chain self entry-converter (on-save) entry)
+	(defer nil (chain self items (save entry)))
+	(defer nil (chain self (add-action flag (@ entry id) val)))
 	(ret))
 
 (add-meth_ *store add-action (action key val)
 	(var _arguments (chain *array prototype slice (call arguments)))
 	(var args (chain arguments (slice 0 -1)))
-	(ret_ (chain this (modify-actions (lambda (actions)
+	(ret_ (chain self (modify-actions (lambda (actions)
 		(chain actions (push (list key val)))
 		(debug (+ "added action: " key " :: " val)))))))
 
@@ -136,10 +133,10 @@
 	(ret))
 
 (add-meth_ *store collapse-actions ()
-	(var reversible `(read star))
+	(var reversible (list "read" "star"))
 	(var blacklist [])
 	(var unique-actions [])
-	(defer nil (chain this (modify-actions (lambda (actions)
+	(defer nil (chain self (modify-actions (lambda (actions)
 		(chain j-query (each actions (lambda (i action)
 			(if (!== false (in_array i blacklist))
 				return)
@@ -161,7 +158,7 @@
 	(ret unique-actions))
 
 (add-meth_ *store modify-actions (_do)
-	(defer action-info (chain this (_get-action-info)))
+	(defer action-info (chain self (_get-action-info)))
 	(var retval (_do (@ action-info values)))
 	(if (instanceof retval *array)
 		(setf (@ action-info values) retval))
@@ -174,18 +171,18 @@
 	(ret action-info))
 
 (add-meth_ *store pending-actions ()
-	(ret_ (chain this (collapse-actions))))
+	(ret_ (chain self (collapse-actions))))
 
 (add-meth_ *store save-image (img) (ret_ (chain self images (save img))))
 
 (add-meth_ *store missing-images ()
-	(defer all-used-images (chain this (_all-used-images)))
-	(defer all-saved-images (chain this (_all-saved-images)))
+	(defer all-used-images (chain self (_all-used-images)))
+	(defer all-saved-images (chain self (_all-saved-images)))
 	(ret (array-minus all-used-images all-saved-images)))
 
 (add-meth_ *store remove-unused-images ()
-	(defer all-used-images  (chain this (_all-used-images)))
-	(defer all-saved-images (chain this (_all-saved-images)))
+	(defer all-used-images  (chain self (_all-used-images)))
+	(defer all-saved-images (chain self (_all-saved-images)))
 
 	(var unused-images (array-minus all-saved-images all-used-images))
 
@@ -204,7 +201,7 @@
 
 (add-meth_ *store replace-with-stored-images (entry)
 	(var body (@ entry body))
-	(defer all-saved-images (chain this images (all)))
+	(defer all-saved-images (chain self images (all)))
 
 	(info (+ "replacing images in " (@ entry key) " (" (@ all-saved-images length) " images downloaded"))
 	(chain j-query (each all-saved-images (lambda (i image)
@@ -220,13 +217,13 @@
 	(defer items (chain self items (all)))
 	(dolist (item items)
 		(if (@ item state read)
-			(chain this items (remove (@ this key)))))
+			(chain self items (remove (@ self key)))))
 	(ret))
 
 (add-meth_ *store _all-saved-images ()
-	(defer all_saved_images (chain self images (all)))
+	(defer all-saved-images (chain self images (all)))
 	(setf all-saved-images (chain j-query (map all-saved-images (lambda (img) (return (@ img key))))))
-	(ret all-used-images))
+	(ret all-saved-images))
 
 (add-meth_ *store tag (tag-name)
 	(defer tag (chain self tags (get tag-name)))

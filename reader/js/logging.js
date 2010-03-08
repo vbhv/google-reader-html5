@@ -19,35 +19,36 @@ Logging = new function() {
 	};
 
 	var output_funcs = {
-		debug:   _console.log,
-		verbose: _console.debug,
-		info:    _console.info,
-		warn:    _console.warn,
-		error:   _console.error
+		debug:   function() { _console.log.apply(_console, arguments)},
+		verbose: function() { _console.debug.apply(_console, arguments)},
+		info:    function() { _console.info.apply(_console, arguments)},
+		warn:    function() { _console.warn.apply(_console, arguments)},
+		error:   function() { _console.error.apply(_console, arguments)}
 	};
 
-	var getlevel = function(lvl_name) {
+	var getLevel = function(lvl_name) {
 		if(!(lvl_name in levels)) {
 			throw("no such level: " + lvl_name);
 		}
 		return levels[lvl_name];
 	};
 
-	self.setlevel = function(lvl_name) {
-		var lvl = getlevel(lvl_name);
+	self.setLevel = function(lvl_name) {
+		var lvl = getLevel(lvl_name);
 		level = levels[lvl_name];
 	};
 
 
 	self.__logfunc = function (lvl_name) {
-		var lvl = getlevel(lvl_name);
+		var lvl = getLevel(lvl_name);
 		return function() {
 			var str = lvl_name.toUpperCase() + ": ";
 			if(lvl >= level) {
-				jQuery.each(arguments, function() {
-					str += this;
+				var args = Array.prototype.slice.call(arguments);
+				for (var i=0; i < args.length; i++) {
+					str += args[i];
 					str += " ";
-				});
+				}
 				output_funcs[lvl_name](str);
 			}
 		};

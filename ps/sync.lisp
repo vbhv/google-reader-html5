@@ -1,18 +1,21 @@
-(defun *sync (reader store processor)
+(defcls *sync (reader store processor)
 	(setf (@ self reader) reader)
 	(setf (@ self store) store)
 	(setf (@ self processor) processor)
 	(setf (@ self busy) false)
-	(return this))
-
-(bake-constructor *sync)
+	)
 
 (add-meth_ *sync pull-tags ()
-	(defer tags (chain self reader (get_user_tags)))
+	(defer tags (chain self reader (get-user-tags)))
 	(ret_ (chain self store (set-valid-tags tags))))
 
+(add-meth_ *sync pull-items (tag-name)
+	(defer feed (_ self reader (get-tag-feed tag-name nil)))
+	(ret_ (map_ (@ feed entries) (lambda_ (entry)
+		(ret_ (_ self store (add-entry tag-name entry)))))))
+
 (add-meth_ *sync _push ()
-	(vebose "pushing")
+	(verbose "pushing")
 	(defer pending-actions (chain self store (pending-actions)))
 	(var progress (new (*progress-bar (@ pending-actions length) "pushing status")))
 	(defer nil (map_ pending-actions (lambda_ (action)
@@ -49,7 +52,7 @@
 		(ret))
 
 
-(add-meth_ *sync run ()
+(add-meth_ *sync _run ()
 	(info "SYNC: run()")
 	(defer nil (chain self (_push)))
 	(chain self store (clear))
@@ -74,7 +77,7 @@
 	(chain window
 		(set-timeout
 			(lambda ()
-				(chain self (mirror-images (*null-cb))))
+				(chain self (mirror-images (*null_cb*))))
 			100))
 	(ret))
 
@@ -87,7 +90,7 @@
 		(chain progress (add 1))
 
 		(debug (+ "downlading image: " url))
-		(GET url nil
+		(*GET* url nil
 			(lambda (data response-code xhr)
 				(var mime-type (chain xhr (get-response-header "Content-type")))
 				(debug (+ "download image: " url " (" mime-type ")"))
@@ -98,20 +101,20 @@
 	(ret))
 
 (add-meth_ *sync push ()
-	(chain self (locked (lambda_ ()
-		(ret_ (chain self (_push)))))))
+	(ret_ (chain self (locked (lambda_ ()
+		(ret_ (chain self (_push))))))))
 
 (add-meth_ *sync run ()
-	(chain self (locked (lambda_ ()
-		(ret_ (chain self (_run)))))))
+	(ret_ (chain self (locked (lambda_ ()
+		(ret_ (chain self (_run))))))))
 
 (add-meth_ *sync locked (func)
 	(if (@ self busy)
 		(progn
 			(info (+ self " is busy"))
 			(ret)))
-	(setf (@self busy) t)
-	(defer nil (chain func (call this)))
+	(setf (@ self busy) t)
+	(defer nil (chain func (call self)))
 	(setf (@ self busy) false)
 	(ret))
 

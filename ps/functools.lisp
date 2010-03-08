@@ -4,9 +4,10 @@
 (defun_ _map-accum (current iterable func)
 	(if (== 0 (@ iterable length))
 		(ret current))
-	(defer result (func (chain iterable pop 0)))
+	(var head (_ iterable (shift)))
+	(defer result (func head))
 	(chain current (push result))
-	(ret (map-accum current iterable func)))
+	(ret_ (_map-accum current iterable func)))
 
 (defun array-minus (a b)
 	(var diff [])

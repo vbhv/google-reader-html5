@@ -60,7 +60,7 @@
 	(defer active-tags (chain self store (get-active-tags)))
 	(if (&& *tag-filter (> 0 (@ *tag-filter length)))
 		(progn
-			(info (+ "filtering tags to just " (chain JSON (stringify(*tag-filter)))))
+			(info (+ "filtering tags to just " (chain *json* (stringify(*tag-filter)))))
 			(setf active-tags (chain active-tags (filter (lambda (tag)
 				(return (!= -1 (chain *tag-filter (index-of (@ tag key)))))))))))
 
@@ -76,8 +76,7 @@
 	(debug "setting up a callback to mirror images...")
 	(chain window
 		(set-timeout
-			(lambda ()
-				(chain self (mirror-images (*null_cb*))))
+			(lambda () (_ self (mirror-images *null_cb*)))
 			100))
 	(ret))
 

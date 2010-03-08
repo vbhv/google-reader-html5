@@ -5,8 +5,8 @@
 (defun main ()
 	(var reader (new (*google-reader)))
 	(var processor (new (*processor)))
-	(var store (new (*store "dom")))
-	; (var store (new (*store)))
+	; (var store (new (*store "dom")))
+	(var store (new (*store)))
 	(var sync (new (*sync reader store processor)))
 	(var ui (new (*ui store)))
 	(setf app (new (*app reader store sync ui processor)))
@@ -16,10 +16,10 @@
 
 ; (j-query main)
 ($ (lambda ()
-	(bake-constructor *google-reader)
+	(setf *google-reader (bake-constructor *google-reader))
 	(main)))
 
 (defun assign (x)
 	(setf result x)
-	(info (+ "result = " (chain *json (stringify result))))
+	(info (+ "result = " (chain *json* (stringify result))))
 	)

@@ -59,7 +59,7 @@ var funcd = function(func) {
 	var args = Array.prototype.slice.call(arguments, 1);
 	args.push(NULL_CB);
 	if(! func) {
-		error("bad func!");
+		throw("no func given to funcd!");
 	}
 	return function() {
 		func.apply(null, args);
@@ -172,7 +172,7 @@ function FeedView(ui, entryView) {
 };
 
 function _show_read_button(self) {
-	return { type: 'a', text: (self.ui.entryFilter ? 'show' : 'hide') + ' read', onclick: funcd(app.toggleShowRead, false), }
+	return { type: 'a', text: (self.ui.entryFilter ? 'show' : 'hide') + ' read', onclick: funcd(app.toggleShowRead), }
 }
 
 function TagListView(ui, tagView) {

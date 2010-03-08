@@ -66,7 +66,10 @@
 	`(defun ,name ,(append lambda-list `(cb)) ,@(convert proc)))
 
 (js:defmacro+ps lambda_ (lambda-list &rest proc)
-	`(lambda ,(append lambda-list `(cb)) ,@(convert proc)))
+	`(lambda ,(append lambda-list `(cb))
+		,@(append
+			`((if (not cb) (throw "no callback given to function")))
+			(convert proc))))
 
 (js:defmacro+ps ret (&rest vals)
 	`(progn

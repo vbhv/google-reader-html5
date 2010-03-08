@@ -9,8 +9,11 @@ def main():
 	params = cgi.FieldStorage()
 
 	params = dict((p.name, p.value) for p in params.list)
-	print handle(params)
+	response = handle(params)
+	print "Content-Type: %s\n\n" % (response.headers['Content-Type'],)
+	print response.content
 
+class Object(object): pass
 
 def handle(params, appengine=False):
 	url = params.pop('url')
@@ -27,7 +30,17 @@ def handle(params, appengine=False):
 	else:
 		urlargs = (url, param_str)
 
-	if not appengine:
+	if appengine:
+		from google.appengine.api.urlfetch import fetch
+		headers = {}
+		if 'SID' in params:
+			headers['Cookie'] = 'SID=%s' % (params.pop('SID'),)
+		response = fetch(*urlargs, **dict(method=method, headers=headers, follow_redirects=False, deadline=10))
+		result = Object()
+		result.body = response.content
+		result.headers = response.headers
+		return result
+	else:
 		import urllib2
 		if 'SID' in params:
 			import cookielib
@@ -38,14 +51,10 @@ def handle(params, appengine=False):
 
 		stream = urllib2.urlopen(*urlargs)
 		content_type = stream.info().type
-		return "Content-Type: %s" % (content_type,) + "\n\n" + stream.read()
-	else:
-		from google.appengine.api.urlfetch import fetch
-		headers = {}
-		if 'SID' in params:
-			headers['Cookie'] = 'SID=%s' % (params.pop('SID'),)
-		response = fetch(*urlargs, **dict(method=method, headers=headers, follow_redirects=False, deadline=10))
-		return response
+		result = Object()
+		result.body = stream.read()
+		result.headers['Content-Type'] = content_type
+		return result
 
 if __name__ == '__main__':
 	main()

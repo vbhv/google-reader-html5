@@ -46,7 +46,7 @@
 
 (add-meth_ *ui render-feed (force-display)
 	(defer tags-with-counts (chain self store (get-tag-counts (@ self tags) (@ self entry-filter))))
-	(var rendered-feed (chain (self (render "taglist" tags-with-counts))))
+	(var rendered-feed (chain self (render "taglist" tags-with-counts)))
 	(chain self tags-dom (empty) (append rendered-feed))
 	(ret))
 

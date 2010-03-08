@@ -10,12 +10,18 @@
 				(setf (@ e body-local) (@ e body)))))
 
 	(defun _table (name filters)
-		(return (new (*lawnchair (create table name adaptor mode)))))
+		(return (new (*lawnchair
+			(create
+				table name
+				adaptor mode
+				on-error (lambda (transaction err) (error (+ "DB error for table " name ": " err.message))))
+		)))
+	)
 
 	(setf (@ self tags)         (_table "tags"))
 	(setf (@ self feeds)        (_table "feeds"))
 	(setf (@ self items)        (_table "items"))
-	(setf (@ self action-store) (_table "action-store"))
+	(setf (@ self action-store) (_table "actionStore"))
 	(setf (@ self images)       (_table "images"))
 	(setf (@ self version)      (_table "version"))
 )
@@ -28,8 +34,8 @@
 	)
 	(defer nil (map_ tag-names (lambda_ (tag-name)
 		(defer tag (chain self tags (get tag-name)))
-		(if (== tag nil)
-			(defer nil (chain self tags (save (create key tag-name entries [])))))
+		(if (!= tag nil) (ret))
+		(defer nil (chain self tags (save (create key tag-name entries []))))
 		(debug (+ "added feed:" tag-name))
 		(ret)
 	)))
@@ -75,7 +81,7 @@
 
 (add-meth_ *store tag-with-entries (tag-name filter)
 	(defer tag (chain self (tag tag-name)))
-	(defer entries (map (@ tag entries) (lambda_ (entry)
+	(defer entries (map_ (@ tag entries) (lambda_ (entry)
 		(defer entry (chain self items (get entry)))
 		(chain self entry-converter (on-load entry))
 		(ret_ (chain self (replace-with-stored-images entry)))
@@ -85,19 +91,21 @@
 	(ret tag))
 
 (add-meth_ *store add-entry (tag-name entry)
-	(defer tag (chain self (tag tag-name)))
+	(defer tag (_ self (tag tag-name)))
 	(if (== tag nil)
 		(progn
-			(warn (+ "no such tag: " (chain JSON (stringify tag-name))))
+			(warn (+ "no such tag: " (chain *json* (stringify tag-name))))
 			(ret)))
 	(if (not (in_array (@ entry id) (@ tag entries)))
 		(progn
 			(chain tag entries (push (@ entry id)))
 			(setf (@ entry key) (@ entry id))
 			(chain self entry-converter (on-save entry))
+			(defer nil (_ self items (save entry)))
+			(defer nil (_ self tags (save tag)))
 			(verbose
 				(+ "added item " (@ entry id) " to tag " (@ tag key) " and now it has " (@ tag entries length)))
-			(ret_ (chain self tags (save tag))))
+			(ret))
 		(ret)
 ))
 
@@ -128,8 +136,8 @@
 		(if (!== index false)
 			(chain actions (splice index -1))
 			(progn
-				(debug (+ "all actions: " (chain JSON (stringify actions))))
-				(error (+ "action not found to delete: " (chain JSON (stringify params)))))))))
+				(debug (+ "all actions: " (chain *json* (stringify actions))))
+				(error (+ "action not found to delete: " (chain *json* (stringify params)))))))))
 	(ret))
 
 (add-meth_ *store collapse-actions ()
@@ -195,7 +203,7 @@
 	(var images [])
 	(chain j-query (each all-items (lambda (i item)
 		(if (not (@ item state read))
-			(if (instanceof (@ elem item) *array)
+			(if (instanceof (@ item images) *array)
 				(setf images (chain images (concat (@ item images)))))))))
 	(ret images))
 

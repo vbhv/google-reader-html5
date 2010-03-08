@@ -1,40 +1,27 @@
-function GoogleReader() {
+function GoogleReader(authUrl) {
 	var self = this;
 	self.token = null;
+	self.authUrl = authUrl;
 
 	self.login = function(user, pass, cb) {
-		data = {
-			service: 'reader',
-			Email: user,
-			Passwd: pass,
-			source: GoogleReaderConst.AGENT,
-			'continue': 'http://www.google.com',
-		};
-
-		POST(GoogleReaderConst.URI_LOGIN, data, function(sidinfo) {
-			self.sid = null;
-			SID_ID = 'SID=';
-			if (sidinfo.indexOf(SID_ID) != -1) {
-				sid = sidinfo.split(SID_ID)[1]
-				if (sid.indexOf('\n') != -1) {
-					sid = sid.split('\n')[0]
-				}
-				self.sid = sid
+		POST(self.authUrl, {user: user, pass: pass},
+			function(auth) {
+				self.auth = auth;
 				cb();
-			} else {
+			},
+			function(err) {
 				alert("authentication failed");
-			}
-		});
+			});
 	};
 
 	self.GET = function(url, data, cb, err) {
-		data['SID'] = self.sid;
+		data['auth'] = self.auth;
 		GET(url, data, cb, err);
 	};
 	self.GET.doAsync = false;
 
 	self.POST = function(url, data, cb, err) {
-		data['SID'] = self.sid;
+		data['auth'] = self.auth;
 		POST(url, data, cb, err);
 	};
 	self.POST.doAsync = false;

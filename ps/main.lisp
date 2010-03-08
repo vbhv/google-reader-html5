@@ -3,7 +3,7 @@
 (_ *logging (set-level "debug"))
 
 (defun main ()
-	(var reader (new (*google-reader)))
+	(var reader (new (*google-reader "/auth")))
 	(var processor (new (*processor)))
 	; (var store (new (*store "dom")))
 	(var store (new (*store)))

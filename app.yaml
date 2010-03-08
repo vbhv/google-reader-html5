@@ -4,11 +4,14 @@ runtime: python
 api_version: 1
 
 handlers:
-- url: /proxy.py
+- url: /proxy.*
   script: main.py
-- url: /reader/
+- url: /reader/?
   static_files: reader/index.html
   upload: reader/index.html
 - url: /reader/(.+)
   static_files: reader/\1
   upload: reader/(ext|js|psjs|res)/.*
+- url: /auth
+  script: main.py
+  secure: always

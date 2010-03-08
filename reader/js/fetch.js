@@ -14,10 +14,10 @@ function _ajax(method, url, data, cb, err) {
 		_USE_FAKE_ = true;
 		// console.log("using fake connection");
 	}
-	if (_USE_PROXY_) {
+	if (_USE_PROXY_ && (url != "/auth")) { // hard code to *not* proxy auth requests
 		data['url'] = url;
 		data['method'] = method;
-		url = '../proxy.py';
+		url = '/proxy';
 		method = 'POST';
 		if (_USE_FAKE_) {
 			data['FAKE'] = 1;

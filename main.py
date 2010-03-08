@@ -3,8 +3,9 @@
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 import proxy
+from auth import AuthHandler
 
-class MainHandler(webapp.RequestHandler):
+class ProxyHandler(webapp.RequestHandler):
 	def post(self):
 		params = {}
 		for param in self.request.arguments():
@@ -12,10 +13,15 @@ class MainHandler(webapp.RequestHandler):
 		result = proxy.handle(params, appengine=True)
 		import logging
 		self.response.headers['Content-Type'] = result.headers['Content-Type']
+		if result.status_code != 200:
+			self.error(result.status_code)
 		self.response.out.write(result.content)
 
 def main():
-	application = webapp.WSGIApplication([('/.*', MainHandler)], debug=True)
+	application = webapp.WSGIApplication([
+		('/proxy*', ProxyHandler),
+		('/auth/?', AuthHandler)
+		], debug=True)
 	util.run_wsgi_app(application)
 
 if __name__ == '__main__':

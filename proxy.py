@@ -32,9 +32,14 @@ def handle(params, appengine=False):
 	if appengine:
 		from google.appengine.api.urlfetch import fetch
 		headers = {}
-		if 'SID' in params:
-			headers['Cookie'] = 'SID=%s' % (params.pop('SID'),)
-		response = fetch(*urlargs, **dict(method=method, headers=headers, follow_redirects=False, deadline=10))
+		if 'auth' in params:
+			(k,v) = params.pop('auth').split("=", 1)
+			import logging
+			logging.info("set %s   =    %s" % ('Authorization:%s' % (k,), v))
+			headers['Authorization:%s' % (k,)] = v
+		response = fetch(*urlargs, **dict(method=method, headers=headers, follow_redirects=True, deadline=10))
+		import logging
+		logging.info(response.content)
 		return response
 	else:
 		import urllib2

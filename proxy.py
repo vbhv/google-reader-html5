@@ -10,8 +10,7 @@ def main():
 
 	params = dict((p.name, p.value) for p in params.list)
 	response = handle(params)
-	print "Content-Type: %s\n\n" % (response.headers['Content-Type'],)
-	print response.content
+	print "Content-Type: %s\n\n%s" % (response.headers['Content-Type'], response.content)
 
 class Object(object): pass
 
@@ -36,10 +35,7 @@ def handle(params, appengine=False):
 		if 'SID' in params:
 			headers['Cookie'] = 'SID=%s' % (params.pop('SID'),)
 		response = fetch(*urlargs, **dict(method=method, headers=headers, follow_redirects=False, deadline=10))
-		result = Object()
-		result.body = response.content
-		result.headers = response.headers
-		return result
+		return response
 	else:
 		import urllib2
 		if 'SID' in params:
@@ -52,7 +48,7 @@ def handle(params, appengine=False):
 		stream = urllib2.urlopen(*urlargs)
 		content_type = stream.info().type
 		result = Object()
-		result.body = stream.read()
+		result.content = stream.read()
 		result.headers['Content-Type'] = content_type
 		return result
 

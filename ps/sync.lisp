@@ -58,9 +58,9 @@
 	(chain self store (clear))
 	(defer nil (chain self (pull-tags)))
 	(defer active-tags (chain self store (get-active-tags)))
-	(if (&& *tag-filter (> 0 (@ *tag-filter length)))
+	(if (&& *tag-filter (!= 0 (@ *tag-filter length)))
 		(progn
-			(info (+ "filtering tags to just " (chain *json* (stringify(*tag-filter)))))
+			(info (+ "filtering tags to just " (chain *json* (stringify *tag-filter))))
 			(setf active-tags (chain active-tags (filter (lambda (tag)
 				(return (!= -1 (chain *tag-filter (index-of (@ tag key)))))))))))
 

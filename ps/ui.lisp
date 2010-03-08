@@ -8,14 +8,17 @@
 	(setf (@ self entry-filter) (@ *entry is-unread))
 	(setf (@ self views) (create
 		:entry (new (*entry-view self))
-		:feed  (new (*feed-view self (new (*entry-view self))))
+		:feed  (new (*feed-view self (new (*entry-list-view self))))
 		:taglist (new (*tag-list-view self (new (*tag-view self))))))
 
 	(setf (@ self dom-areas) (list (@ self tags-dom) (@ self feed-dom) (@ self entry-dom)))
 	)
 
 (add-meth *ui render (name obj)
-	(return (chain (getprop (@ self views) name) (render obj))))
+	(var result (chain (getprop (@ self views) name) (render obj)))
+	(debug (+ "rendered " name "!"))
+	(return result))
+	
 
 (add-meth_ *ui reload-tags ()
 	(chain self tags-dom (empty))
@@ -45,9 +48,9 @@
 	(ret))
 
 (add-meth_ *ui render-feed (force-display)
-	(defer tags-with-counts (chain self store (get-tag-counts (@ self tags) (@ self entry-filter))))
-	(var rendered-feed (chain self (render "taglist" tags-with-counts)))
-	(chain self tags-dom (empty) (append rendered-feed))
+	(var rendered-feed (chain self (render "feed" (@ self active-feed))))
+	(chain self feed-dom (empty) (append rendered-feed))
+	(if force-display (_ self (show-feed-list)))
 	(ret))
 
 (add-meth *ui render-entry (entry)
@@ -104,7 +107,7 @@
 (add-meth *ui show (dom)
 	(dolist (area (@ self dom-areas))
 		(if (== dom area)
-			(chain self (show))
-			(chain self (hide)))))
+			(chain area (show))
+			(chain area (hide)))))
 
 

@@ -11,4 +11,4 @@ handlers:
   upload: reader/index.html
 - url: /reader/(.+)
   static_files: reader/\1
-  upload: reader/.*
+  upload: reader/(ext|js|psjs|res)/.*

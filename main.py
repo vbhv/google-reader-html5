@@ -11,9 +11,8 @@ class MainHandler(webapp.RequestHandler):
 			params[param] = self.request.get(param)
 		result = proxy.handle(params, appengine=True)
 		import logging
-		logging.error(result)
 		self.response.headers['Content-Type'] = result.headers['Content-Type']
-		self.response.out.write(result.body)
+		self.response.out.write(result.content)
 
 def main():
 	application = webapp.WSGIApplication([('/.*', MainHandler)], debug=True)

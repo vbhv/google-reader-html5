@@ -28,7 +28,7 @@ function _ajax(method, url, data, cb, err) {
 		type: method,
 		url: url,
 		data: data,
-		error: err || function() { alert("things went sour while fetching url: " + url + " with data:\n" + JSON.stringify(data)); },
+		error: err || function() { alert("things went sour while fetching url: " + url + " with data:\n"); },
 		success: cb,
 	})
 }

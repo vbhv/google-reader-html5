@@ -16,7 +16,7 @@
 	(if is-empty
 		(progn
 			(info "starting a sync")
-			(ret (chain self (do-sync t)))))
+			(ret_ (chain self (do-sync t)))))
 	(verbose "no sync needed")
 	(var success false)
 	(chain self ui (refresh (lambda () (setf success t) (ret))))

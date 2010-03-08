@@ -219,7 +219,7 @@
 				(debug (+ "replacing image URL " url " with data: " (@ image data)))
 				(chain body (replace url (@ image data) "gi")))))))
 	(setf (@ entry body-local) body)
-	(ret))
+	(ret entry))
 
 (add-meth_ *store delete-read-items ()
 	(defer items (chain self items (all)))

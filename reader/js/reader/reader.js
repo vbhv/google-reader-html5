@@ -1,20 +1,51 @@
-function GoogleReader(authUrl) {
+function GoogleReader(authUrl, auth) {
 	var self = this;
 	self.token = null;
 	self.authUrl = authUrl;
+	self.auth = auth || null;
 
-	self.login = function(user, pass, cb) {
-		POST(self.authUrl, {user: user, pass: pass},
-			function(auth) {
+	self.login = function(user, pass, captcha_data, captcha_resolution, cb) {
+		var data = {user: user, pass: pass};
+		if("token" in captcha_data) {
+			data["captcha_token"] = captcha_data["token"];
+			data["captcha_response"] = captcha_data["response"];
+		}
+		POST(self.authUrl, data,
+			function(response) {
+				if(auth.match(/^{/)) {
+					verbose("captcha required!");
+					captcha_resolution(JSON.parse(auth), function(captcha_response) {
+						self.login(user, pass, captcha_response, captcha_resolution, cb);
+					});
+					return;
+				}
+				verbose("logged in");
 				self.auth = auth;
-				cb();
+				cb(true);
 			},
 			function(err) {
-				alert("authentication failed");
+				verbose("not logged in");
+				cb(false);
 			});
 	};
 
+	self.loggedIn = function(cb) {
+		if(! self.auth) {
+			cb(false);
+			return;
+		}
+
+		self.GET(
+			GoogleReaderConst.URI_PING,
+			{},
+			function() { cb(true); }, //success
+			function() { cb(false); });
+	};
+
 	self.GET = function(url, data, cb, err) {
+		if(! self.auth) {
+			throw "Error: not logged in!";
+		}
 		data['auth'] = self.auth;
 		GET(url, data, cb, err);
 	};
@@ -54,15 +85,14 @@ function GoogleReader(authUrl) {
 	self._translateArgs = function(dictionary, googleargs, kwargs) {
 		// `dictionary` maps nicely named args (as keys) to
 		// google's API keys (as values). This takes in some
-		// kwartgs, and populates (mutates) googleargs
+		// kwargs, and populates (mutates) googleargs
 		// appropriately.
 
-		for (arg in dictionary) {
-			if (arg in kwargs) {
+		for (arg in kwargs) {
+			if (arg in dictionary) {
 				googleargs[dictionary[arg]] = kwargs[arg];
-			}
-			if (dictionary[arg] in kwargs) {
-				googleargs[dictionary[arg]] = kwargs[dictionary[arg]];
+			} else {
+				console.error("unknown google reader key: " + arg);
 			}
 		}
 	};
@@ -86,7 +116,9 @@ function GoogleReader(authUrl) {
 		urlargs = {};
 		opts['client'] = GoogleReaderConst.AGENT;
 		opts['timestamp'] = self.getTimestamp();
+		debug("getFeed: " + JSON.stringify(opts));
 		self._translateArgs( GoogleReaderConst.ATOM_ARGS, urlargs, opts );
+		debug("getFeed: urlargs = " + JSON.stringify(urlargs));
 
 		function innerCb(data) {
 			cb(new Feed(data));
@@ -169,8 +201,9 @@ function GoogleReader(authUrl) {
 		if (!('count' in opts)) {
 			count = GoogleReaderConst.ITEMS_PER_REQUEST;
 		}
-		if( !('excludeTarget' in opts) )
+		if( !('excludeTarget' in opts) ) {
 			opts['excludeTarget'] = GoogleReaderConst.ATOM_STATE_READ;
+		}
 
 		opts['feed'] = GoogleReaderConst.ATOM_PREFIXE_LABEL + tag;
 
@@ -183,7 +216,6 @@ function GoogleReader(authUrl) {
 			var tagNames = Array();
 			for(var i=0; i<tags.length; i++) {
 				var tag = tags[i];
-				// var count = unreadHash[tag.id];
 				parts = tag.id.split('/',4);
 				var name = parts[3];
 				if (parts[2] == 'label') {

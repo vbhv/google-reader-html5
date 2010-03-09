@@ -5,7 +5,7 @@
 
 	(var migrations (list))
 
-	(defer last-version (_ store version (get migrate-key)))
+	(defer last-version (_ store (current-version)))
 	(debug (+ "current DB version: " last-version))
 	(if (>= current-version last-version) (ret))
 

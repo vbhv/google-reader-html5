@@ -23,8 +23,27 @@
 	(setf (@ self items)        (_table "items"))
 	(setf (@ self action-store) (_table "actionStore"))
 	(setf (@ self images)       (_table "images"))
-	(setf (@ self version)      (_table "version"))
+	(setf (@ self app-info)      (_table "appinfo"))
 )
+
+(add-meth_ *store set-single-key (key val)
+	(ret_ (_ self app-info (save (create key key value val)))))
+
+(add-meth_ *store get-single-key (key default-value)
+	(defer val (_ self app-info (get key)))
+	(if val
+		(setf val (@ val value))
+		(setf val default-value))
+	(ret val))
+
+(add-meth_ *store current-version ()
+	(ret_ (_ self (get-single-key "version" 0))))
+
+(add-meth_ *store get-auth-token ()
+	(ret_ (_ self (get-single-key "auth" nil))))
+
+(add-meth_ *store set-auth-token (token)
+	(ret_ (_ self (set-single-key "auth" token))))
 
 (add-meth_ *store set-valid-tags (tag-names)
 	(defer current-tags (chain self tags (all)))

@@ -7,7 +7,6 @@
 	(setf (@ self ui) ui)
 	(setf (@ self sync) sync)
 	(setf (@ self processor) processor)
-	(setf (@ self logged-in) false)
 	)
 
 (add-meth_ *app main ()
@@ -45,19 +44,40 @@
 	(ret_ (chain self (do-sync do-download))))
 
 (add-meth_ *app ensure-login ()
-	(if (@ self logged-in) (ret))
-	(defer nil (chain self reader
+	(defer logged-in (_ self reader (logged-in)))
+	(if logged-in
+		(progn
+			(verbose "already logged in")
+			(ret)))
+	(ret_ (_ self (_do-login 0))))
+
+(add-meth_ *app _do-login (n)
+	(if (== n 3)
+		(throw "Too many login attempts"))
+	(var user (prompt "User:"))
+	(if (! user) (throw "login cancelled"))
+	(var password (prompt "Password:"))
+	(if (! password) (throw "login cancelled"))
+	(defer logged-in (chain self reader
 		(login
-			(|| (@ *login-details user) (prompt "User:"))
-			(|| (@ *login-details password) (prompt "Password:")))))
-	(setf (@ self logged-in) t)
+			(|| (@ *login-details user) user)
+			(|| (@ *login-details password) password)
+			{}
+			(@ self resolve-captcha))))
+	(if (=== false logged-in)
+		(ret_ (_ self (_do-login (+ n 1)))))
+	(verbose "login succeeded")
+	(defer nil (_ self store (set-auth-token (@ self reader auth))))
 	(ret))
+
+(add-meth_ *app resolve-captcha (token url)
+	(_ window (open url))
+	(var response (prompt "enter captcha text:"))
+	(ret response))
 
 (add-meth_ *app toggle-show-read ()
 	(setf (@ self ui filter)
 		(if (@ self ui entry-filter) nil (@ *entry is-unread)))
 	(defer nil (chain self ui (render-tags false)))
 	(defer nil (chain self ui (render-feed false))))
-
-
 

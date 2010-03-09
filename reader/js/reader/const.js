@@ -1,72 +1,73 @@
 GoogleReaderConst = {
-    URI_LOGIN: 'https://www.google.com/accounts/ClientLogin',
-    URI_PREFIXE_READER: 'http://www.google.com/reader/',
+		URI_LOGIN: 'https://www.google.com/accounts/ClientLogin',
+		URI_PREFIXE_READER: 'http://www.google.com/reader/',
 
-    ATOM_GET_FEED: 'feed/',
+		ATOM_GET_FEED: 'feed/',
 
-    ATOM_PREFIXE_USER: 'user/-/',
-    ATOM_PREFIXE_USER_NUMBER: 'user/'+'0'*20+'/',
+		ATOM_PREFIXE_USER: 'user/-/',
+		ATOM_PREFIXE_USER_NUMBER: 'user/'+'0'*20+'/',
 
-    API_EDIT_SUBSCRIPTION: 'subscription/edit',
-    API_EDIT_TAG: 'edit-tag',
+		API_EDIT_SUBSCRIPTION: 'subscription/edit',
+		API_EDIT_TAG: 'edit-tag',
 
-    API_LIST_PREFERENCE: 'preference/list',
-    API_LIST_SUBSCRIPTION: 'subscription/list',
-    API_LIST_TAG: 'tag/list',
-    API_LIST_UNREAD_COUNT: 'unread-count',
-    API_TOKEN: 'token',
-    ITEMS_PER_REQUEST: 100, // just a default
+		API_LIST_PREFERENCE: 'preference/list',
+		API_LIST_SUBSCRIPTION: 'subscription/list',
+		API_LIST_TAG: 'tag/list',
+		API_LIST_UNREAD_COUNT: 'unread-count',
+		API_TOKEN: 'token',
+		ITEMS_PER_REQUEST: 100, // just a default
 
-    OUTPUT_XML: 'xml',
-    OUTPUT_JSON: 'json',
+		OUTPUT_XML: 'xml',
+		OUTPUT_JSON: 'json',
 
-    AGENT:'js-googlereader',
+		AGENT:'js-googlereader',
 
-    ATOM_ARGS: {
-        'start_time' : 'ot',
-        'order' : 'r',
-        'exclude_target' : 'xt',
-        'count' : 'n',
-        'continuation' : 'c',
-        'client' : 'client',
-        'timestamp' : 'ck',
-        },
+		ATOM_ARGS: {
+				'startTime' : 'ot',
+				'order' : 'r',
+				'excludeTarget' : 'xt',
+				'count' : 'n',
+				'continuation' : 'c',
+				'client' : 'client',
+				'timestamp' : 'ck',
+				'feed' : 'feed',
+				},
 
-    EDIT_TAG_ARGS: {
-        'feed' : 's',
-        'entry' : 'i',
-        'add' : 'a',
-        'remove' : 'r',
-        'action' : 'ac',
-        'token' : 'T',
-        },
+		EDIT_TAG_ARGS: {
+				'feed' : 's',
+				'entry' : 'i',
+				'add' : 'a',
+				'remove' : 'r',
+				'action' : 'ac',
+				'token' : 'T',
+				},
 
-    EDIT_SUBSCRIPTION_ARGS: {
-        'feed' : 's',
-        'entry' : 'i',
-        'title' : 't',
-        'add' : 'a',
-        'remove' : 'r',
-        'action' : 'ac',
-        'token' : 'T',
-        },
+		EDIT_SUBSCRIPTION_ARGS: {
+				'feed' : 's',
+				'entry' : 'i',
+				'title' : 't',
+				'add' : 'a',
+				'remove' : 'r',
+				'action' : 'ac',
+				'token' : 'T',
+				},
 
-    LIST_ARGS: {
-        'output' : 'output',
-        'client' : 'client',
-        'timestamp' : 'ck',
-        'all' : 'all',
-        },
+		LIST_ARGS: {
+				'output' : 'output',
+				'client' : 'client',
+				'timestamp' : 'ck',
+				'all' : 'all',
+				},
 
-    QUICKADD_ARGS: {
-        'url' : 'quickadd',
-        'token' : 'T',
-    },
+		QUICKADD_ARGS: {
+				'url' : 'quickadd',
+				'token' : 'T',
+		},
 
-    ORDER_REVERSE: 'o',
-    ACTION_REVERSE: 'o',
+		ORDER_REVERSE: 'o',
+		ACTION_REVERSE: 'o',
 
-    GOOGLE_SCHEME: 'http://www.google.com/reader/',
+		GOOGLE_SCHEME: 'http://www.google.com/reader/',
 }
 
 
@@ -83,4 +84,5 @@ GoogleReaderConst['ATOM_STATE_BROADCAST'] = GoogleReaderConst.ATOM_PREFIXE_STATE
 GoogleReaderConst['ATOM_STATE_STARRED'] = GoogleReaderConst.ATOM_PREFIXE_STATE_GOOGLE + 'starred';
 GoogleReaderConst['ATOM_SUBSCRIPTIONS'] = GoogleReaderConst.ATOM_PREFIXE_STATE_GOOGLE + 'subscriptions';
 GoogleReaderConst['URI_QUICKADD'] = GoogleReaderConst.URI_PREFIXE_READER + 'quickadd';
+GoogleReaderConst['URI_PING'] = GoogleReaderConst.URI_PREFIXE_READER + 'user-info';
 

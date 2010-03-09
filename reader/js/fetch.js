@@ -14,7 +14,7 @@ function _ajax(method, url, data, cb, err) {
 		_USE_FAKE_ = true;
 		// console.log("using fake connection");
 	}
-	if (_USE_PROXY_ && (url != "/auth")) { // hard code to *not* proxy auth requests
+	if (_USE_PROXY_ && (! url.match(/^https:/))) { // don't proxy https requests
 		data['url'] = url;
 		data['method'] = method;
 		url = '/proxy';
@@ -22,8 +22,16 @@ function _ajax(method, url, data, cb, err) {
 		if (_USE_FAKE_) {
 			data['FAKE'] = 1;
 		}
+		console.log("DATA: " + JSON.stringify(data));
 	}
-	// console.log("DATA: " + JSON.stringify(data));
+
+	if(url.match(/^https:\/\/localhost/)) {
+		// local https doesn't work...
+		url = url.replace(/^https/, 'http');
+	}
+	console.log("DATA: " + JSON.stringify(data));
+	console.log("URL: " + JSON.stringify(url));
+
 	jQuery.ajax({
 		type: method,
 		url: url,

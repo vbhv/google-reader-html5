@@ -6,7 +6,7 @@ api_version: 1
 handlers:
 - url: /proxy.*
   script: main.py
-- url: /reader/?
+- url: /reader/
   static_files: reader/index.html
   upload: reader/index.html
 - url: /reader/(.+)

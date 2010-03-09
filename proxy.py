@@ -34,13 +34,9 @@ def handle(params, appengine=False):
 		headers = {}
 		if 'auth' in params:
 			#(k,v) = params.pop('auth').split("=", 1)
-			import logging
 			auth_key = params.pop('auth')
-			logging.info("set %s   =    %s" % ('Authorization:', auth_key))
 			headers['Authorization'] = auth_key
 		response = fetch(*urlargs, **dict(method=method, headers=headers, follow_redirects=True, deadline=10))
-		import logging
-		logging.info(response.content)
 		return response
 	else:
 		import urllib2

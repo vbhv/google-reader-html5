@@ -12,7 +12,10 @@ function GoogleReader(authUrl, auth) {
 		}
 		POST(self.authUrl, data,
 			function(response) {
-				if(auth.match(/^{/)) {
+				if(!auth) {
+					throw "empty authorization token";
+				}
+				if(auth.strip().match(/^{/)) {
 					verbose("captcha required!");
 					captcha_resolution(JSON.parse(auth), function(captcha_response) {
 						self.login(user, pass, captcha_response, captcha_resolution, cb);

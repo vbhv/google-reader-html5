@@ -1,7 +1,6 @@
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 import sys
-import urllib
 import gdata.service
 import gdata.alt.appengine
 
@@ -18,9 +17,9 @@ def auth(email, passwd, captcha_token=None, captcha_response=None):
 	try:
 		client.ProgrammaticLogin(**kw)
 	except gdata.service.CaptchaRequired, e:
-		return "{error:\"captcha\", captcha_image: \"%s\", captcha_token: \"%s\"}" % (
-			urllib.quote(client.captcha_url),
-			urllib.quote(client.captcha_token))
+		return '{"error":"captcha", "captcha_image": "%s", "captcha_token": "%s"}' % (
+			client.captcha_url,
+			client.captcha_token)
 	return client.current_token
 
 class AuthHandler(webapp.RequestHandler):
@@ -31,8 +30,6 @@ class AuthHandler(webapp.RequestHandler):
 			if not token:
 				raise RuntimeError("empty token!")
 			self.response.out.write(token)
-			import logging
-			logging.info(token)
 		except gdata.service.BadAuthentication, e:
 			self.error(401)
 			self.response.out.write("ERROR: %s" % (e,))
